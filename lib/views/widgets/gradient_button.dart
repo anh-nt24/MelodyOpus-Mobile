@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class GradientButton extends StatelessWidget {
   final String text;
-  final IconData icon;
+  final IconData? icon;
   final VoidCallback onPressed;
 
   GradientButton({
@@ -48,7 +48,8 @@ class GradientButton extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 5.0),
-              Icon(icon, color: Colors.white),
+              if (icon != null)
+                Icon(icon, color: Colors.white),
             ],
           ),
         ),

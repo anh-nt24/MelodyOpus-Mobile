@@ -5,6 +5,7 @@ import 'package:melodyopus/models/user.dart';
 import 'package:melodyopus/providers/auth_provider.dart';
 import 'package:melodyopus/providers/music_play_provider.dart';
 import 'package:melodyopus/repositories/song_repository.dart';
+import 'package:melodyopus/services/song_service.dart';
 import 'package:melodyopus/views/pages/play_music.dart';
 import 'package:melodyopus/views/widgets/genre_card.dart';
 import 'package:melodyopus/views/widgets/loading.dart';
@@ -33,8 +34,8 @@ class _HomeTabState extends State<HomeTab> {
   @override
   void initState() {
     super.initState();
-    SongRepository songRepository = SongRepository();
-    songs = songRepository.getAllSongs();
+    SongService _songService = SongService();
+    songs = _songService.getAllSongs();
   }
 
   @override

@@ -1,26 +1,17 @@
-import 'dart:convert';
-
-import 'package:http/http.dart' as http;
-import 'package:melodyopus/constants.dart';
+import 'package:melodyopus/models/song.dart';
+import 'package:melodyopus/repositories/song_repository.dart';
 
 class SongService {
-  SongService._privateConstructor();
+  SongService._internal();
+  static final SongService _instance = SongService._internal();
+  factory SongService() => _instance;
 
-  static final SongService songInstance = SongService._privateConstructor();
+  SongRepository _songRepository = SongRepository();
 
-  Future<Map<String, dynamic>> get(String endpoint) async {
-    final response = await http.get(
-      Uri.parse('${Constants.baseApi}$endpoint'),
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-    );
-    if (response.statusCode == 200) {
-      return jsonDecode(utf8.decode(response.bodyBytes));
-    }
-    else {
-      throw Exception('Failed to load data');
-    }
+  Future<List<Song>> getAllSongs() async {
+    Map<String, dynamic> response = await _songRepository.get('/song/');
+    List<dynamic> content = response['content'];
+    List<Song> songs = content.map((json) => Song.fromJson(json)).toList();
+    return songs;
   }
 }

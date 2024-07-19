@@ -1,20 +1,25 @@
-import 'dart:convert';
-
-import 'package:http/http.dart' as http;
-import 'package:melodyopus/constants.dart';
+import 'package:melodyopus/models/user.dart';
+import 'package:melodyopus/repositories/user_repository.dart';
 
 class UserService {
-  // singleton
-  UserService._privateConstructor();
-  static final UserService userInstance = UserService._privateConstructor();
+  UserService._internal();
+  static final UserService _instance = UserService._internal();
 
+  factory UserService() => _instance;
 
-  Future<Map<String, dynamic>> post(String endpoint, Map<String, dynamic> data) async {
-    final response = await http.post(
-      Uri.parse('$Constants.baseApi$endpoint'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(data),
-    );
-    return jsonDecode(response.body);
+  UserRepository _userRepository = UserRepository();
+
+  Future<User?> login(String username, String password) async {
+    Map<String, dynamic> data = {
+      "username": username,
+      "password": password
+    };
+
+    Map<String, dynamic> response = await _userRepository.post('/login', data);
+    if (response.containsKey("user")) {
+      return User.fromJson(response['user']);
+    } else {
+      return null;
+    }
   }
 }
