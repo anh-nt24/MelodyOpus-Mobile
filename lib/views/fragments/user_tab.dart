@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:melodyopus/models/user.dart';
 import 'package:melodyopus/providers/auth_provider.dart';
 import 'package:melodyopus/views/pages/login.dart';
+import 'package:melodyopus/views/widgets/get_avatar.dart';
 import 'package:melodyopus/views/widgets/gradient_button.dart';
 import 'package:provider/provider.dart';
 
@@ -31,14 +32,7 @@ class _UserTabState extends State<UserTab> {
                     height: 100,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(360),
-                      child: Image.asset(
-                        user!.avatar,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Image.asset(
-                          'assets/user.jpg',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
+                      child: getUserAvatar(user!),
                     ),
                   ),
                   const SizedBox(height: 50),

@@ -17,16 +17,24 @@ class MusicPlayerProvider with ChangeNotifier {
   List<Song> _playlist = [];
   int _currentIndex = 0;
 
+  bool _isFullScreen = true;
+
   bool _playing = false;
 
   List<Song> get playlist => _playlist;
   int get currentIndex => _currentIndex;
   Stream<DurationState>? get durationState => _audioManager.durationState;
   bool get isPlaying => _playing;
+  bool get isFullScreen => _isFullScreen;
 
   Song? get currentSong => _playlist.isNotEmpty ? _playlist[_currentIndex] : null;
 
   get getPlayerStateStream => _audioManager.getPlayerStateStream;
+
+  void setFullScreen(bool isShown) {
+    _isFullScreen = isShown;
+    notifyListeners();
+  }
 
 
   void setPlaylist(List<Song> songs, {int index = 0}) {
@@ -34,6 +42,7 @@ class MusicPlayerProvider with ChangeNotifier {
         && songs.isNotEmpty
         && songs[index].filePath == currentSong?.filePath) {
       _audioManager.init();
+      _audioManager.play();
     } else {
       _playlist = songs;
       _currentIndex = index;
@@ -72,11 +81,13 @@ class MusicPlayerProvider with ChangeNotifier {
   void play() {
     _audioManager.play();
     _playing = true;
+    notifyListeners();
   }
 
   void pause() {
     _audioManager.pause();
     _playing = false;
+    notifyListeners();
   }
 
   void stop() async {

@@ -1,3 +1,4 @@
+import 'package:melodyopus/models/paginated_response.dart';
 import 'package:melodyopus/models/song.dart';
 import 'package:melodyopus/repositories/song_repository.dart';
 
@@ -8,10 +9,12 @@ class SongService {
 
   SongRepository _songRepository = SongRepository();
 
-  Future<List<Song>> getAllSongs() async {
-    Map<String, dynamic> response = await _songRepository.get('/song/');
-    List<dynamic> content = response['content'];
-    List<Song> songs = content.map((json) => Song.fromJson(json)).toList();
-    return songs;
+
+  Future<PaginatedResponse<Song>> getAllSongs({int page=0, int pageSize=20}) async {
+    try {
+      return await _songRepository.getAllSongs(page, pageSize);
+    } catch (e) {
+      rethrow;
+    }
   }
 }

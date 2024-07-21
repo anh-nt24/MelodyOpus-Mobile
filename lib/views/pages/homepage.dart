@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:melodyopus/providers/music_play_provider.dart';
 import 'package:melodyopus/views/widgets/mini_player.dart';
+import 'package:provider/provider.dart';
 import '../fragments/explore_tab.dart';
 import '../fragments/home_tab.dart';
 import '../fragments/library_tab.dart';
@@ -16,6 +18,28 @@ class Homepage extends StatefulWidget {
 
 class _HomepageState extends State<Homepage> {
   int _selectedIndex = 0;
+  bool _showMiniPlayer = true;
+  late MusicPlayerProvider musicPlayer;
+
+  @override
+  void initState() {
+    super.initState();
+    musicPlayer = Provider.of<MusicPlayerProvider>(context, listen: false);
+    musicPlayer.addListener(_onMusicPlayerChanged);
+  }
+
+  void _onMusicPlayerChanged() {
+    if (mounted) {
+      setState(() {
+        if (musicPlayer.isPlaying) {
+          print('Music playing');
+          setState(() {
+            _showMiniPlayer = true;
+          });
+        }
+      });
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -40,10 +64,15 @@ class _HomepageState extends State<Homepage> {
               UserTab(),
             ],
           ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: MiniPlayer(),
-          ),
+          if (_showMiniPlayer)
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: MiniPlayer(onDismiss: () {
+                setState(() {
+                  _showMiniPlayer = false;
+                });
+              }),
+            ),
         ],
       ),
 

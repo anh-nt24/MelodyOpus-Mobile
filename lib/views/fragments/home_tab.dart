@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:melodyopus/models/paginated_response.dart';
 import 'package:melodyopus/models/song.dart';
 import 'package:melodyopus/models/user.dart';
 import 'package:melodyopus/providers/auth_provider.dart';
 import 'package:melodyopus/providers/music_play_provider.dart';
-import 'package:melodyopus/repositories/song_repository.dart';
 import 'package:melodyopus/services/song_service.dart';
 import 'package:melodyopus/views/pages/play_music.dart';
+import 'package:melodyopus/views/widgets/custom_snack_bar.dart';
 import 'package:melodyopus/views/widgets/genre_card.dart';
+import 'package:melodyopus/views/widgets/get_avatar.dart';
 import 'package:melodyopus/views/widgets/loading.dart';
 import 'package:melodyopus/views/widgets/song_card_rec.dart';
 import 'package:melodyopus/views/widgets/song_card_square.dart';
@@ -22,7 +24,14 @@ class HomeTab extends StatefulWidget {
 
 class _HomeTabState extends State<HomeTab> {
 
-  late Future<List<Song>> songs;
+  final SongService _songService = SongService();
+  final ScrollController _scrollController1 = ScrollController();
+  final ScrollController _scrollController2 = ScrollController();
+  List<Song> _songs = [];
+  int _currentPage = 0;
+  final int _pageSize = 20;
+  bool _isLoading = false;
+  bool _hasMore = true;
 
   @override
   void dispose() {
@@ -34,8 +43,72 @@ class _HomeTabState extends State<HomeTab> {
   @override
   void initState() {
     super.initState();
-    SongService _songService = SongService();
-    songs = _songService.getAllSongs();
+    _loadSongs();
+
+    _scrollController1.addListener(() {
+      if (_scrollController1.position.pixels == _scrollController1.position.maxScrollExtent && !_isLoading) {
+        _loadMoreSongs();
+      }
+    });
+
+    _scrollController2.addListener(() {
+      if (_scrollController2.position.pixels == _scrollController2.position.maxScrollExtent && !_isLoading) {
+        _loadMoreSongs();
+      }
+    });
+  }
+
+  Future<void> _loadSongs() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      PaginatedResponse<Song> response = await _songService.getAllSongs(
+        page: _currentPage,
+        pageSize:  _pageSize
+      );
+      setState(() {
+        _songs = response.content;
+        _hasMore = _currentPage < response.totalPages - 1;
+      });
+    } catch (e) {
+      print(e);
+      CustomSnackBar.show(context: context, content: e.toString());
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadMoreSongs() async {
+    if (!_hasMore) {
+      CustomSnackBar.show(context: context, content: "You've reached the end of the song list");
+      return ;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      PaginatedResponse<Song> response = await _songService.getAllSongs(
+        page: _currentPage + 1,
+        pageSize: _pageSize
+      );
+      setState(() {
+        _currentPage++;
+        _songs.addAll(response.content);
+        _hasMore = _currentPage < response.totalPages - 1;
+      });
+    } catch (e) {
+      CustomSnackBar.show(context: context, content: e.toString());
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -73,10 +146,10 @@ class _HomeTabState extends State<HomeTab> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(color: Color.fromRGBO(0, 219, 252, 1), width: 2.0),
-                            image: DecorationImage(
-                                image: AssetImage(user!.avatar),
-                                fit: BoxFit.cover
-                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(360),
+                            child: getUserAvatar(user!),
                           ),
                         ),
                         SizedBox(width: 10),
@@ -153,45 +226,36 @@ class _HomeTabState extends State<HomeTab> {
 
                 SizedBox(height: 10),
 
-                FutureBuilder<List<Song>>(
-                  future: songs,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      List<Song> songList = snapshot.data!;
-                      return Container(
-                        height: 230,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          children: [
-                            for (Song song in songList)
-                              GestureDetector(
-                                child: Padding(
-                                    padding: EdgeInsets.all(5),
-                                    child: SongCardSquare(
-                                        title: song.title,
-                                        image: song.thumbnail,
-                                        author: song.author)
-                                ),
-                                onTap: () {
-                                  musicPlayer.setPlaylist([song]);
-                                  Navigator.push(
-                                    context, 
-                                    MaterialPageRoute(builder: (context) => PlayMusic())
-                                  );
-                                },
-                              ),
-
-                            const SizedBox(width: 5),
-
-                          ],
-                        ),
-                      );
-                    } else if (snapshot.hasError) {
-                      return Center(child: Text('Error loading songs: ${snapshot.error}', style: TextStyle(color: Colors.white),));
-                    } else {
-                      return Center(child: Loading());
-                    }
-                }),
+                Container(
+                  height: 230,
+                  child: ListView.builder(
+                    controller: _scrollController1,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _songs.length + (_hasMore ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index == _songs.length) {
+                        return Center(child: Loading());
+                      }
+                      return GestureDetector(
+                          child: Padding(
+                              padding: EdgeInsets.all(5),
+                              child: SongCardSquare(
+                                  title: _songs[index].title,
+                                  image: _songs[index].thumbnail,
+                                  author: _songs[index].author)
+                          ),
+                          onTap: () {
+                            musicPlayer.setPlaylist([_songs[index]]);
+                            musicPlayer.setFullScreen(true);
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => PlayMusic())
+                            );
+                          },
+                        );
+                    },
+                  ),
+                  ),
 
 
                 SizedBox(height: 30,),
@@ -215,48 +279,45 @@ class _HomeTabState extends State<HomeTab> {
 
                 SizedBox(height: 10),
 
-                FutureBuilder<List<Song>>(
-                  future: songs,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      List<Song> songList = snapshot.data!;
-                      return Container(
-                        height: 500,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          children: [
-                            for (int i=0; i<songList.length; i+=2)
-                              Column(
-                                children: [
-                                  for (int j=0; j<2 && i+j<songList.length;++j)
-                                    GestureDetector(
-                                      child: Padding(
-                                          padding: EdgeInsets.all(5),
-                                          child: SongCardSquare(
-                                              title: songList[i+j].title,
-                                              image: songList[i+j].thumbnail,
-                                              author: songList[i+j].author)
-                                      ),
-                                      onTap: () {
-                                        // Navigator.push(
-                                        //     context,
-                                        //     MaterialPageRoute(builder: (context) => PlayMusic())
-                                        // );
-                                      },
-                                    )
-                                ],
+                Container(
+                  height: 500,
+                  child: ListView.builder(
+                    controller: _scrollController2,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _songs.length + (_hasMore ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index == _songs.length) {
+                        return Center(child: Loading());
+                      }
+
+                      int startIndex = index * 2;
+                      int endIndex = (startIndex + 2).clamp(0, _songs.length);
+
+                      return Column(
+                        children: [
+                          for (int i = startIndex; i < endIndex; i++)
+                            GestureDetector(
+                              child: Padding(
+                                padding: EdgeInsets.all(5),
+                                child: SongCardSquare(
+                                  title: _songs[i].title,
+                                  image: _songs[i].thumbnail,
+                                  author: _songs[i].author,
+                                ),
                               ),
-                            const SizedBox(width: 5),
-                          ],
-                        ),
+                              onTap: () {
+                                // Navigator.push(
+                                //     context,
+                                //     MaterialPageRoute(builder: (context) => PlayMusic())
+                                // );
+                              },
+                            ),
+                        ],
                       );
-                    } else if (snapshot.hasError) {
-                      return Center(child: Text('Error loading songs: ${snapshot.error}', style: TextStyle(color: Colors.white),));
-                    } else {
-                      return Center(child: Loading());
-                    }
-                  }
+                    },
+                  ),
                 ),
+
 
                 SizedBox(height: 30,),
 
@@ -281,47 +342,47 @@ class _HomeTabState extends State<HomeTab> {
                 SizedBox(height: 10),
 
 
-                FutureBuilder<List<Song>>(
-                    future: songs,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        List<Song> songList = snapshot.data!;
-                        return Container(
-                          height: 500,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: [
-                              for (int i=0; i<songList.length; i+=2)
-                                Column(
-                                  children: [
-                                    for (int j=0; j<2 && i+j<songList.length;++j)
-                                      GestureDetector(
-                                        child: Padding(
-                                            padding: EdgeInsets.all(5),
-                                            child: SongCardSquare(
-                                                title: songList[i+j].title,
-                                                image: songList[i+j].thumbnail,
-                                                author: songList[i+j].author)
-                                        ),
-                                        onTap: () {
-                                          // Navigator.push(
-                                          //     context,
-                                          //     MaterialPageRoute(builder: (context) => PlayMusic(song: songList[i+j]))
-                                          // );
-                                        },
-                                      )
-                                  ],
-                                )
-                            ],
-                          ),
-                        );
-                      } else if (snapshot.hasError) {
-                        return Center(child: Text('Error loading songs: ${snapshot.error}', style: TextStyle(color: Colors.white),));
-                      } else {
-                        return Center(child: Loading());
-                      }
-                    }
-                ),
+                // FutureBuilder<List<Song>>(
+                //     future: songs,
+                //     builder: (context, snapshot) {
+                //       if (snapshot.hasData) {
+                //         List<Song> songList = snapshot.data!;
+                //         return Container(
+                //           height: 500,
+                //           child: ListView(
+                //             scrollDirection: Axis.horizontal,
+                //             children: [
+                //               for (int i=0; i<songList.length; i+=2)
+                //                 Column(
+                //                   children: [
+                //                     for (int j=0; j<2 && i+j<songList.length;++j)
+                //                       GestureDetector(
+                //                         child: Padding(
+                //                             padding: EdgeInsets.all(5),
+                //                             child: SongCardSquare(
+                //                                 title: songList[i+j].title,
+                //                                 image: songList[i+j].thumbnail,
+                //                                 author: songList[i+j].author)
+                //                         ),
+                //                         onTap: () {
+                //                           // Navigator.push(
+                //                           //     context,
+                //                           //     MaterialPageRoute(builder: (context) => PlayMusic(song: songList[i+j]))
+                //                           // );
+                //                         },
+                //                       )
+                //                   ],
+                //                 )
+                //             ],
+                //           ),
+                //         );
+                //       } else if (snapshot.hasError) {
+                //         return Center(child: Text('Error loading songs: ${snapshot.error}', style: TextStyle(color: Colors.white),));
+                //       } else {
+                //         return Center(child: Loading());
+                //       }
+                //     }
+                // ),
 
                 SizedBox(height: 30,),
 

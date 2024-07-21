@@ -11,8 +11,14 @@ class AuthProvider extends ChangeNotifier {
       username: 'guest',
       email: '',
       avatar: 'assets/user.jpg',
+      verified: false,
       jwt: ''
     );
+  }
+
+  void setUser(User newUser) {
+    _user = newUser;
+    notifyListeners();
   }
 
   User? getUser() => _user;

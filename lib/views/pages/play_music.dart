@@ -60,120 +60,128 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
   Widget build(BuildContext context) {
     final musicPlayer = MusicPlayerProvider();
     // musicPlayer.play();
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color.fromRGBO(31, 31, 31, 0.09),
-        leading: IconButton(
-          icon: Icon(Icons.keyboard_arrow_down, size: 25, color: Colors.white70,),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        actions: [
-          SizedBox(width: 40,)
-        ],
-        elevation: 20,
-        title: Center(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              musicPlayer.currentSong!.title.length > 20 ?
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    child: Container(
-                      height: 20,
-                      child: Marquee(
-                        text: musicPlayer.currentSong!.title,
+    return PopScope(
+      onPopInvoked: (didPop) {
+        if (didPop) {
+          musicPlayer.setFullScreen(false);
+        }
+      },
+      child: Scaffold(
+            appBar: AppBar(
+                backgroundColor: Color.fromRGBO(31, 31, 31, 0.09),
+                leading: IconButton(
+                  icon: Icon(Icons.keyboard_arrow_down, size: 25, color: Colors.white70,),
+                  onPressed: () {
+                    musicPlayer.setFullScreen(false);
+                    Navigator.pop(context);
+                  },
+                ),
+                actions: [
+                  SizedBox(width: 40,)
+                ],
+                elevation: 20,
+                title: Center(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      musicPlayer.currentSong!.title.length > 20 ?
+                      SizedBox(
+                          width: MediaQuery.of(context).size.width,
+                          child: Container(
+                            height: 20,
+                            child: Marquee(
+                              text: musicPlayer.currentSong!.title,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16,
+                              ),
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              showFadingOnlyWhenScrolling: true,
+                              scrollAxis: Axis.horizontal,
+                              blankSpace: 25.0,
+                              velocity: 40.0,
+                              accelerationCurve: Curves.linear,
+                              decelerationCurve: Curves.easeOut,
+                            ),
+                          )
+                      )
+                          :
+                      Text(
+                        musicPlayer.currentSong!.title,
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w500,
                           fontSize: 16,
                         ),
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        showFadingOnlyWhenScrolling: true,
-                        scrollAxis: Axis.horizontal,
-                        blankSpace: 25.0,
-                        velocity: 40.0,
-                        accelerationCurve: Curves.linear,
-                        decelerationCurve: Curves.easeOut,
                       ),
-                    )
-                  )
-                  :
-                  Text(
-                    musicPlayer.currentSong!.title,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 16,
+
+                      SizedBox(height: 5),
+                      Text(
+                        musicPlayer.currentSong!.author,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                        ),
+                      )
+                    ],
+                  ),
+                )
+            ),
+            body: Padding(
+              padding: EdgeInsets.only(left: 30, right: 30),
+              child: Column(
+                children: [
+                  const SizedBox(height: 10),
+                  Container(
+                    height: 25,
+                    width: 70,
+                    child: StepProgressIndicator(
+                      totalSteps: 3,
+                      currentStep: currentPage,
+                      size: 3,
+                      customColor: (index) => index == currentPage-1 ? Color.fromRGBO(0, 219, 252, 1) : Colors.grey,
+                      roundedEdges: Radius.circular(5),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    height: 460,
+                    child: PageView(
+                      controller: pageController,
+                      onPageChanged: (int page) {
+                        setState(() {
+                          currentPage = page+1;
+                        });
+                      },
+                      children: [
+                        PlaylistScreen(),
+                        NowPlayingScreen(song: musicPlayer.currentSong!, animationController: animationController),
+                        LyricsScreen(),
+                      ],
                     ),
                   ),
 
-              SizedBox(height: 5),
-              Text(
-                musicPlayer.currentSong!.author,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                ),
-              )
-            ],
-          ),
-        )
-      ),
-      body: Padding(
-        padding: EdgeInsets.only(left: 30, right: 30),
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            Container(
-              height: 25,
-              width: 70,
-              child: StepProgressIndicator(
-                totalSteps: 3,
-                currentStep: currentPage,
-                size: 3,
-                customColor: (index) => index == currentPage-1 ? Color.fromRGBO(0, 219, 252, 1) : Colors.grey,
-                roundedEdges: Radius.circular(5),
-              ),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              height: 460,
-              child: PageView(
-                controller: pageController,
-                onPageChanged: (int page) {
-                  setState(() {
-                    currentPage = page+1;
-                  });
-                },
-                children: [
-                  PlaylistScreen(),
-                  NowPlayingScreen(song: musicPlayer.currentSong!, animationController: animationController),
-                  LyricsScreen(),
+
+                  SizedBox(
+                      height: 50,
+                      child: _getMusicProgressBar(context)
+                  ),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _getSuffleButton(context),
+                      _getPreviousButton(context),
+                      _getPlayButton(context),
+                      _getNextButton(context),
+                      _getLoopMode(context),
+                    ],
+                  )
                 ],
               ),
-            ),
-
-
-            SizedBox(
-              height: 50,
-              child: _getMusicProgressBar(context)
-            ),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _getSuffleButton(context),
-                _getPreviousButton(context),
-                _getPlayButton(context),
-                _getNextButton(context),
-                _getLoopMode(context),
-              ],
             )
-          ],
-        ),
-      )
+        )
     );
   }
 

@@ -9,17 +9,19 @@ class UserService {
 
   UserRepository _userRepository = UserRepository();
 
-  Future<User?> login(String username, String password) async {
-    Map<String, dynamic> data = {
-      "username": username,
-      "password": password
-    };
+  Future<User> login(String username, String password) async {
+    try {
+      return await _userRepository.login(username, password);
+    } catch (e) {
+      rethrow;
+    }
+  }
 
-    Map<String, dynamic> response = await _userRepository.post('/login', data);
-    if (response.containsKey("user")) {
-      return User.fromJson(response['user']);
-    } else {
-      return null;
+  Future<void> signup(String name, String email, String username, String password) async {
+    try {
+      await _userRepository.signup(name, email, username, password);
+    } catch (e) {
+      rethrow;
     }
   }
 }

@@ -1,26 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:melodyopus/models/user.dart';
-import 'package:melodyopus/providers/auth_provider.dart';
 import 'package:melodyopus/services/user_service.dart';
 import 'package:melodyopus/views/pages/homepage.dart';
-import 'package:melodyopus/views/pages/signup.dart';
+import 'package:melodyopus/views/pages/login.dart';
 import 'package:melodyopus/views/widgets/custom_snack_bar.dart';
 import 'package:melodyopus/views/widgets/media_button_controller.dart';
-import 'package:provider/provider.dart';
 
-class Login extends StatefulWidget {
-  const Login({super.key});
+class SignUp extends StatefulWidget {
+  const SignUp({super.key});
 
   @override
-  State<Login> createState() => _LoginState();
+  State<SignUp> createState() => _SignUpState();
 }
 
-class _LoginState extends State<Login> {
+class _SignUpState extends State<SignUp> {
   TextEditingController _passwordController = TextEditingController();
   TextEditingController _usernameController = TextEditingController();
-
+  TextEditingController _nameController = TextEditingController();
+  TextEditingController _cfmPasswordController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
   RegExp regex = RegExp(r'^[a-zA-Z0-9_.]*$');
+
+  RegExp emailRegExp = RegExp(
+    r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+  );
+
+
 
   late UserService _userService;
 
@@ -62,8 +67,8 @@ class _LoginState extends State<Login> {
               child: Mediabuttoncontroller(
                 function: () {
                   Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => Homepage())
+                    context,
+                    MaterialPageRoute(builder: (context) => Homepage())
                   );
                 },
                 icon: Icons.home,
@@ -74,13 +79,13 @@ class _LoginState extends State<Login> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Login", style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w500),),
+                  Text("Sign Up", style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w500),),
                   SizedBox(height: 10,),
-                  Text("Welcome Back", style: TextStyle(color: Colors.white, fontSize: 18)),
+                  Text("Welcome", style: TextStyle(color: Colors.white, fontSize: 18)),
                 ],
               ),
             ),
-            SizedBox(height: 40),
+            SizedBox(height: 20),
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
@@ -91,7 +96,7 @@ class _LoginState extends State<Login> {
                   padding: EdgeInsets.all(30),
                   child: Column(
                     children: [
-                      SizedBox(height: 20,),
+                      SizedBox(height: 10,),
                       Container(
                         decoration: BoxDecoration(
                             color: Colors.white,
@@ -105,7 +110,35 @@ class _LoginState extends State<Login> {
                         child: Column(
                           children: [
                             Container(
-                              padding: EdgeInsets.all(10),
+                              padding: EdgeInsets.symmetric(vertical: 3, horizontal: 10),
+                              decoration: BoxDecoration(
+                                  border: Border(bottom: BorderSide(color: Colors.grey.shade200))
+                              ),
+                              child: TextField(
+                                controller: _nameController,
+                                decoration: InputDecoration(
+                                    hintText: "Your name",
+                                    hintStyle: TextStyle(color: Colors.grey),
+                                    border: InputBorder.none
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(vertical: 3, horizontal: 10),
+                              decoration: BoxDecoration(
+                                  border: Border(bottom: BorderSide(color: Colors.grey.shade200))
+                              ),
+                              child: TextField(
+                                controller: _emailController,
+                                decoration: InputDecoration(
+                                    hintText: "Your email",
+                                    hintStyle: TextStyle(color: Colors.grey),
+                                    border: InputBorder.none
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(vertical: 3, horizontal: 10),
                               decoration: BoxDecoration(
                                   border: Border(bottom: BorderSide(color: Colors.grey.shade200))
                               ),
@@ -119,7 +152,7 @@ class _LoginState extends State<Login> {
                               ),
                             ),
                             Container(
-                              padding: EdgeInsets.all(10),
+                              padding: EdgeInsets.symmetric(vertical: 3, horizontal: 10),
                               decoration: BoxDecoration(
                                   border: Border(bottom: BorderSide(color: Colors.grey.shade200))
                               ),
@@ -133,17 +166,29 @@ class _LoginState extends State<Login> {
                                 ),
                               ),
                             ),
+                            Container(
+                              padding: EdgeInsets.symmetric(vertical: 3, horizontal: 10),
+                              decoration: BoxDecoration(
+                                  border: Border(bottom: BorderSide(color: Colors.grey.shade200))
+                              ),
+                              child: TextField(
+                                controller: _cfmPasswordController,
+                                obscureText: true,
+                                decoration: InputDecoration(
+                                    hintText: "Confirm your password",
+                                    hintStyle: TextStyle(color: Colors.grey),
+                                    border: InputBorder.none
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
 
                       SizedBox(height: 25,),
 
-                      Text("Forgot Password?", style: TextStyle(color: Colors.grey)),
-
-                      SizedBox(height: 25,),
                       MaterialButton(
-                        onPressed: _handleLogin,
+                        onPressed: _handleSignup,
                         height: 50,
                         // margin: EdgeInsets.symmetric(horizontal: 50),
                         color: Color(0xFF7145F5).withOpacity(1),
@@ -154,15 +199,15 @@ class _LoginState extends State<Login> {
                         // decoration: BoxDecoration(
                         // ),
                         child: Center(
-                          child: Text("Login", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+                          child: Text("Sign up", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
                         ),
                       ),
-                      SizedBox(height: 20),
+                      SizedBox(height: 10),
                       MaterialButton(
                         onPressed: () {
                           Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => SignUp())
+                              MaterialPageRoute(builder: (context) => Login())
                           );
                         },
                         height: 50,
@@ -174,18 +219,18 @@ class _LoginState extends State<Login> {
                         // decoration: BoxDecoration(
                         // ),
                         child: Center(
-                          child: Text("Sign up", style: TextStyle(fontWeight: FontWeight.bold),),
+                          child: Text("Login", style: TextStyle(fontWeight: FontWeight.bold),),
                         ),
                       ),
-                      SizedBox(height: 40,),
+                      SizedBox(height: 10,),
                       Text("Continue with social media", style: TextStyle(color: Colors.grey)),
-                      SizedBox(height: 30,),
+                      SizedBox(height: 10,),
                       Row(
                         children: [
                           Expanded(
                             child: MaterialButton(
                               onPressed: (){},
-                              height: 50,
+                              height: 40,
                               color: Colors.blue,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(50),
@@ -195,11 +240,11 @@ class _LoginState extends State<Login> {
                               ),
                             ),
                           ),
-                          SizedBox(width: 30,),
+                          SizedBox(width: 20,),
                           Expanded(
                             child: MaterialButton(
                               onPressed: () {},
-                              height: 50,
+                              height: 40,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(50),
 
@@ -223,61 +268,59 @@ class _LoginState extends State<Login> {
     );
   }
 
-  void _handleLogin() async {
+  void _handleSignup() async {
     String username = _usernameController.text;
     String password = _passwordController.text;
+    String name = _nameController.text;
+    String email = _emailController.text;
+    String cfmPassword = _cfmPasswordController.text;
 
-    if (username.isEmpty || password.isEmpty) {
+    if (username.isEmpty || password.isEmpty || name.isEmpty || email.isEmpty) {
       CustomSnackBar.show(
         context: context,
-        content: 'You must fill all the fields',
+        content: "All fields must be filled"
       );
-      return;
+      return ;
     }
 
-    if (username.length < 6) {
+    if (!emailRegExp.hasMatch(email)) {
       CustomSnackBar.show(
-        context: context,
-        content: 'Username must be at least 6 characters long',
-      );
-      return;
-    }
-
-    if (!regex.hasMatch(username)) {
-      CustomSnackBar.show(
-        context: context,
-        content: 'Username can only contain letters, numbers, underscore, and dot',
+          context: context,
+          content: "Please enter a valid email address"
       );
       return;
     }
 
     if (password.length < 6) {
       CustomSnackBar.show(
-        context: context,
-        content: 'Password must be at least 6 characters long',
+          context: context,
+          content: "Password should be at least 6 characters"
+      );
+      return;
+    }
+
+    if (password != cfmPassword) {
+      CustomSnackBar.show(
+          context: context,
+          content: "Passwords do not match"
       );
       return;
     }
 
     try {
-      User userResponse =  await _userService.login(username, password);
-      Provider.of<AuthProvider>(context, listen: false).setUser(userResponse);
-
-
-
+      await _userService.signup(name, email, username, password);
       CustomSnackBar.show(
           context: context,
-          content: "Login successfully"
+          content: "Your account has been created successfully. Now LOGIN to join"
       );
-
       Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => Homepage())
+        context, 
+        MaterialPageRoute(builder: (context) => Login())
       );
     } catch (e) {
       CustomSnackBar.show(
           context: context,
-          content: "Username or password may not correct"
+          content: e.toString()
       );
     }
   }
