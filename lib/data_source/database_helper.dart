@@ -26,16 +26,6 @@ class LocalDatabaseHelper {
   }
 
   Future<void> _onCreate(Database db, int version) async {
-    // create user database
-    await db.execute('''
-      CREATE TABLE Users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id TEXT UNIQUE,
-        name TEXT,
-        username TEXT,
-        avatar TEXT,
-      )
-    ''');
 
     // create song table
     await db.execute('''

@@ -74,4 +74,32 @@ class Song {
       author: map['author'],
     );
   }
+
+  Song copyWith({
+    int? id,
+    String? title,
+    String? genre,
+    String? lyric,
+    int? duration,
+    String? releaseDate,
+    String? filePath,
+    String? thumbnail,
+    int? listened,
+    int? author_id,
+    String? author,
+  }) {
+    return Song(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      genre: genre ?? this.genre,
+      lyric: lyric ?? this.lyric,
+      duration: duration ?? this.duration,
+      releaseDate: releaseDate ?? this.releaseDate,
+      filePath: filePath ?? this.filePath,
+      thumbnail: thumbnail ?? this.thumbnail,
+      listened: listened ?? this.listened,
+      author_id: author_id ?? this.author_id,
+      author: author ?? this.author,
+    );
+  }
 }

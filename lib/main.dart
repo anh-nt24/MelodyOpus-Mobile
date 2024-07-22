@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:melodyopus/providers/auth_provider.dart';
 import 'package:melodyopus/providers/music_play_provider.dart';
 import 'package:melodyopus/splash_screen.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +8,7 @@ void main() async {
   runApp(
     MultiProvider(providers: [
       ChangeNotifierProvider(create: (_) => MusicPlayerProvider()),
+      ChangeNotifierProvider(create: (_) => AuthProvider()),
     ],
     child: const MyApp(),
     ),

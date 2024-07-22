@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:melodyopus/models/user.dart';
+import 'package:melodyopus/providers/auth_provider.dart';
 import 'package:melodyopus/services/sharedpreference_service.dart';
 import 'package:melodyopus/services/user_service.dart';
 import 'package:melodyopus/views/pages/homepage.dart';
@@ -261,10 +262,7 @@ class _LoginState extends State<Login> {
 
     try {
       User userResponse =  await _userService.login(username, password);
-      final sharedPreferencesService = SharedPreferencesService();
-      await sharedPreferencesService.saveUserInfo(userResponse);
-
-
+      await Provider.of<AuthProvider>(context, listen: false).login(userResponse);
 
       CustomSnackBar.show(
           context: context,

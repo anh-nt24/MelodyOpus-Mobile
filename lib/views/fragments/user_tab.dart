@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:melodyopus/models/user.dart';
+import 'package:melodyopus/providers/auth_provider.dart';
 import 'package:melodyopus/services/sharedpreference_service.dart';
 import 'package:melodyopus/views/pages/login.dart';
 import 'package:melodyopus/views/widgets/get_avatar.dart';
@@ -15,40 +16,17 @@ class UserTab extends StatefulWidget {
 }
 
 class _UserTabState extends State<UserTab> {
-  late User _user;
-  bool isUserLoaded = false;
-
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _loadUserInfo();
-  }
-
-  Future<void> _loadUserInfo() async {
-    final sharedPreferencesService = SharedPreferencesService();
-    final loadedUser = await sharedPreferencesService.getUserInfo();
-
-    if (loadedUser != null) {
-      setState(() {
-        _user = loadedUser;
-        isUserLoaded = true;
-      });
-    } else {
-      setState(() {
-        isUserLoaded = true;
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!isUserLoaded) {
-      return Scaffold(
-        body: Center(child: Loading())
-      );
-    }
-    if (_user == null || _user!.id < 0) {
+    final authProviver = Provider.of<AuthProvider>(context);
+    User user = authProviver.user;
+    if (user.id < 0) {
       return Scaffold(
         body: Center(
           child: Column(
@@ -62,7 +40,7 @@ class _UserTabState extends State<UserTab> {
                     height: 100,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(360),
-                      child: getUserAvatar(_user!),
+                      child: getUserAvatar(user),
                     ),
                   ),
                   const SizedBox(height: 50),

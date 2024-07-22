@@ -31,6 +31,18 @@ class User {
     );
   }
 
+  factory User.fromMap(Map<String, dynamic> json) {
+    return User(
+      id: json['id'],
+      name: json['name'],
+      username: json['username'],
+      email: json['email'],
+      avatar: json['avatar'],
+      verified: json['verified'],
+      jwt: json['jwt'],
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -39,19 +51,19 @@ class User {
       'email': email,
       'avatar': avatar,
       'verified': verified,
-      'jwt': ''
+      'jwt': jwt,
     };
   }
 
-  factory User.fromMap(Map<String, dynamic> map) {
+  static User guest() {
     return User(
-      id: map['id'],
-      name: map['name'],
-      email: map['email'],
-      username: map['username'],
-      avatar: map['avatar'],
-      verified: map['verified'],
-      jwt: map['jwt']
+      id: -1,
+      name: 'Guest',
+      username: 'guest',
+      email: 'guest@example.com',
+      avatar: 'assets/user.jpg',
+      verified: false,
+      jwt: '',
     );
   }
 

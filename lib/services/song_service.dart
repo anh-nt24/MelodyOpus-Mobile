@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:melodyopus/models/paginated_response.dart';
 import 'package:melodyopus/models/song.dart';
 import 'package:melodyopus/repositories/song_repository.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 class SongService {
   SongService._internal();
@@ -16,5 +20,40 @@ class SongService {
     } catch (e) {
       rethrow;
     }
+  }
+
+  Future<void> downloadSong(Song song) async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final songFilePath = '${directory.path}/${_getCurrentDateTime()}.mp3';
+      final thumbnailFilePath = '${directory.path}/${_getCurrentDateTime()}.jpg';
+
+      // download song
+      final songResponse = await http.get(Uri.parse(song.filePath));
+      final songFile = File(songFilePath);
+      await songFile.writeAsBytes(songResponse.bodyBytes);
+
+      // download thumbnail
+      final imageResponse = await http.get(Uri.parse(song.thumbnail));
+      final imageFile = File(thumbnailFilePath);
+      await imageFile.writeAsBytes(imageResponse.bodyBytes);
+
+      final downloadedSong = song.copyWith(
+          filePath: songFilePath,
+          thumbnail: thumbnailFilePath
+      );
+
+      final songRepository = SongRepository();
+      await songRepository.insertSongLocal(downloadedSong);
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  String _getCurrentDateTime() {
+    DateTime now = DateTime.now();
+    String formattedDateTime = '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}'
+        '${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}';
+    return formattedDateTime;
   }
 }

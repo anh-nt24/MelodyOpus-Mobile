@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:melodyopus/constants.dart';
 import 'package:melodyopus/models/song.dart';
+import 'package:melodyopus/models/user.dart';
+import 'package:melodyopus/services/sharedpreference_service.dart';
+import 'package:melodyopus/services/song_service.dart';
+import 'package:melodyopus/views/pages/login.dart';
+import 'package:melodyopus/views/widgets/custom_alert_dialog.dart';
+import 'package:melodyopus/views/widgets/custom_snack_bar.dart';
 import 'package:melodyopus/views/widgets/media_button_controller.dart';
 
 class NowPlayingScreen extends StatefulWidget {
@@ -54,14 +60,61 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>{
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Mediabuttoncontroller(function: () {}, icon: Icons.share, size: 22,),
-                Mediabuttoncontroller(function: () {}, icon: Icons.download, size: 22,),
+                _handleDownloadSong(),
                 Mediabuttoncontroller(function: () {}, icon: Icons.playlist_add),
-                Mediabuttoncontroller(function: () {}, icon: Icons.favorite_border_outlined),
+                Mediabuttoncontroller(function: () {}, icon: Icons.favorite_border),
               ],
             )
           ],
         )
       )
+    );
+  }
+
+  Widget _handleDownloadSong() {
+    return Mediabuttoncontroller(
+      function: () async {
+        final sharePrefService = SharedPreferencesService();
+        bool isLoggedIn = await sharePrefService.isLoggedIn();
+        if (!isLoggedIn) {
+          CustomAlertDialog.show(
+            context: context, 
+            title: "Alert",
+            message: "You have to log in to use this feature", 
+            button: "Log in",
+            function: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Login())
+              );
+            }
+          ); 
+        } else {
+          try {
+            print('Downloading');
+            CustomSnackBar.show(
+                context: context,
+                content: "Downloading"
+            );
+            final songService = SongService();
+            await songService.downloadSong(widget.song);
+            CustomSnackBar.show(
+                context: context,
+                content: "Download successfully"
+            );
+            print('Download successfully');
+          } catch (e) {
+            print('Download failed');
+            print(e);
+            CustomSnackBar.show(
+                context: context,
+                content: "Download failed"
+            );
+          }
+        }
+      },
+      icon: Icons.download,
+      size: 22,
     );
   }
 }
