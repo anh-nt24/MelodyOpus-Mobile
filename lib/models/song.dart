@@ -42,4 +42,36 @@ class Song {
       author: json['userName'],
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'title': title,
+      'genre': genre,
+      'lyric': lyric,
+      'duration': duration,
+      'releaseDate': releaseDate,
+      'filePath': filePath,
+      'thumbnail': thumbnail,
+      'listened': listened,
+      'author_id': author_id,
+      'author': author,
+    };
+  }
+
+  factory Song.fromMap(Map<String, dynamic> map) {
+    return Song(
+      id: map['id'],
+      title: map['title'],
+      genre: map['genre'],
+      lyric: map['lyric'],
+      duration: map['duration'],
+      releaseDate: map['releaseDate'],
+      filePath: map['filePath'],
+      thumbnail: map['thumbnail'],
+      listened: map['listened'],
+      author_id: map['author_id'],
+      author: map['author'],
+    );
+  }
 }

@@ -3,8 +3,8 @@ import 'package:flutter/rendering.dart';
 import 'package:melodyopus/models/paginated_response.dart';
 import 'package:melodyopus/models/song.dart';
 import 'package:melodyopus/models/user.dart';
-import 'package:melodyopus/providers/auth_provider.dart';
 import 'package:melodyopus/providers/music_play_provider.dart';
+import 'package:melodyopus/services/sharedpreference_service.dart';
 import 'package:melodyopus/services/song_service.dart';
 import 'package:melodyopus/views/pages/play_music.dart';
 import 'package:melodyopus/views/widgets/custom_snack_bar.dart';
@@ -33,6 +33,9 @@ class _HomeTabState extends State<HomeTab> {
   bool _isLoading = false;
   bool _hasMore = true;
 
+  late User _user;
+  bool isUserLoaded = false;
+
   @override
   void dispose() {
     // TODO: implement dispose
@@ -43,6 +46,7 @@ class _HomeTabState extends State<HomeTab> {
   @override
   void initState() {
     super.initState();
+    _loadUserInfo();
     _loadSongs();
 
     _scrollController1.addListener(() {
@@ -56,6 +60,22 @@ class _HomeTabState extends State<HomeTab> {
         _loadMoreSongs();
       }
     });
+  }
+
+  Future<void> _loadUserInfo() async {
+    final sharedPreferencesService = SharedPreferencesService();
+    final loadedUser = await sharedPreferencesService.getUserInfo();
+
+    if (loadedUser != null) {
+      setState(() {
+        _user = loadedUser;
+        isUserLoaded = true;
+      });
+    } else {
+      setState(() {
+        isUserLoaded = true;
+      });
+    }
   }
 
   Future<void> _loadSongs() async {
@@ -114,16 +134,14 @@ class _HomeTabState extends State<HomeTab> {
   @override
   Widget build(BuildContext context) {
     final musicPlayer = Provider.of<MusicPlayerProvider>(context);
-    final authProvider = Provider.of<AuthProvider>(context);
     Map<String, String> genres = {
       "assets/indie.png": "Indie",
       "assets/kpop.png": "K-Pop",
       "assets/pop.png": "Pop",
       "assets/r&b.png": "R&B"
     };
-    User? user = authProvider.getUser();
     return Scaffold(
-      body: ListView(
+      body: !isUserLoaded ? Center(child: Loading()) : ListView(
         scrollDirection: Axis.vertical,
         children: [
           Padding(
@@ -149,7 +167,7 @@ class _HomeTabState extends State<HomeTab> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(360),
-                            child: getUserAvatar(user!),
+                            child: getUserAvatar(_user!),
                           ),
                         ),
                         SizedBox(width: 10),
@@ -158,7 +176,7 @@ class _HomeTabState extends State<HomeTab> {
                           children: [
                             // Hello
                             Text("Hello,", style: TextStyle(color: Colors.white, fontSize: 20),),
-                            Text(" " + user!.username, style: TextStyle(color: Colors.white70, fontSize: 15),),
+                            Text(" " + _user!.username, style: TextStyle(color: Colors.white70, fontSize: 15),),
                           ],
                         )
                       ],

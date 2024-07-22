@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:melodyopus/models/user.dart';
-import 'package:melodyopus/providers/auth_provider.dart';
+import 'package:melodyopus/services/sharedpreference_service.dart';
 import 'package:melodyopus/services/user_service.dart';
 import 'package:melodyopus/views/pages/homepage.dart';
 import 'package:melodyopus/views/pages/signup.dart';
@@ -261,7 +261,8 @@ class _LoginState extends State<Login> {
 
     try {
       User userResponse =  await _userService.login(username, password);
-      Provider.of<AuthProvider>(context, listen: false).setUser(userResponse);
+      final sharedPreferencesService = SharedPreferencesService();
+      await sharedPreferencesService.saveUserInfo(userResponse);
 
 
 
@@ -270,7 +271,7 @@ class _LoginState extends State<Login> {
           content: "Login successfully"
       );
 
-      Navigator.push(
+      Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => Homepage())
       );

@@ -31,6 +31,30 @@ class User {
     );
   }
 
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'username': username,
+      'email': email,
+      'avatar': avatar,
+      'verified': verified,
+      'jwt': ''
+    };
+  }
+
+  factory User.fromMap(Map<String, dynamic> map) {
+    return User(
+      id: map['id'],
+      name: map['name'],
+      email: map['email'],
+      username: map['username'],
+      avatar: map['avatar'],
+      verified: map['verified'],
+      jwt: map['jwt']
+    );
+  }
+
   static String _getInitials(String name) {
     final names = name.split(' ');
     if (names.length > 1) {
