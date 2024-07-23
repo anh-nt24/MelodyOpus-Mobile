@@ -64,7 +64,7 @@ class _SignUpState extends State<SignUp> {
             SizedBox(height: 20),
             Padding(
               padding: EdgeInsets.only(left: 10),
-              child: Mediabuttoncontroller(
+              child: MediaButtonController(
                 function: () {
                   Navigator.push(
                     context,

@@ -87,6 +87,7 @@ flutter:
     - assets/onboarding_background.png
     - assets/onboarding_image.png
     - assets/user.jpg
+    - assets/music_poster.jpg
 
 
 flutter_icons:

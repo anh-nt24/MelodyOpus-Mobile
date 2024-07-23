@@ -119,7 +119,7 @@ class _MiniPlayerState extends State<MiniPlayer> {
               Container(
                 width: 30,
                 padding: EdgeInsets.zero,
-                child: Mediabuttoncontroller(
+                child: MediaButtonController(
                   function: () {
                     musicPlayer.playPrevious();
                   },
@@ -131,7 +131,7 @@ class _MiniPlayerState extends State<MiniPlayer> {
               Container(
                 width: 30,
                 padding: EdgeInsets.zero,
-                child: Mediabuttoncontroller(
+                child: MediaButtonController(
                   function: () {
                     if (isPlaying) {
                       musicPlayer.pause();
@@ -153,7 +153,7 @@ class _MiniPlayerState extends State<MiniPlayer> {
               Container(
                   width: 30,
                   padding: EdgeInsets.zero,
-                  child: Mediabuttoncontroller(
+                  child: MediaButtonController(
                     function: () {
                       musicPlayer.playNext();
                     },

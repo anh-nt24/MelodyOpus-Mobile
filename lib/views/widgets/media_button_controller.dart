@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class Mediabuttoncontroller extends StatefulWidget {
+class MediaButtonController extends StatefulWidget {
   final void Function()? function;
   final IconData icon;
   final double size;
@@ -8,7 +8,7 @@ class Mediabuttoncontroller extends StatefulWidget {
   final bool useBackground;
   final Color backgroundColor;
 
-  const Mediabuttoncontroller({
+  const MediaButtonController({
     super.key,
     required this.function,
     required this.icon,
@@ -19,10 +19,10 @@ class Mediabuttoncontroller extends StatefulWidget {
   });
 
   @override
-  State<Mediabuttoncontroller> createState() => _MediabuttoncontrollerState();
+  State<MediaButtonController> createState() => _MediaButtonControllerState();
 }
 
-class _MediabuttoncontrollerState extends State<Mediabuttoncontroller> {
+class _MediaButtonControllerState extends State<MediaButtonController> {
   @override
   Widget build(BuildContext context) {
     if (widget.useBackground == true) {

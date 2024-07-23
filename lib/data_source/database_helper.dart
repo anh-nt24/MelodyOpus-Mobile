@@ -31,7 +31,6 @@ class LocalDatabaseHelper {
     await db.execute('''
       CREATE TABLE Songs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        song_id TEXT UNIQUE,
         title TEXT,
         genre TEXT,
         lyric TEXT,

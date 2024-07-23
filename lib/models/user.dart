@@ -31,6 +31,7 @@ class User {
     );
   }
 
+
   factory User.fromMap(Map<String, dynamic> json) {
     return User(
       id: json['id'],

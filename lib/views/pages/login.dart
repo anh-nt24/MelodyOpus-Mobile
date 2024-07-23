@@ -60,7 +60,7 @@ class _LoginState extends State<Login> {
             SizedBox(height: 20),
             Padding(
               padding: EdgeInsets.only(left: 10),
-              child: Mediabuttoncontroller(
+              child: MediaButtonController(
                 function: () {
                   Navigator.push(
                       context,

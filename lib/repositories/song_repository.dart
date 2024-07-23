@@ -21,8 +21,20 @@ class SongRepository {
     await _localDataSource.insertSong(song);
   }
 
+  Future<Song?> fetchDownloadedSongById(int id) async {
+    try {
+      return await _localDataSource.fetchSongById(id);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<List<Song>> fetchDownloadedSongs() async {
-    return await _localDataSource.fetchAllSongs();
+    try {
+      return await _localDataSource.fetchAllSongs();
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<PaginatedResponse<Song>> getAllSongs(int page, int pageSize) async {

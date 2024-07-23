@@ -1,16 +1,18 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 class SongCardRec extends StatelessWidget {
   String title;
   String image;
   String author;
-  double percentage;
+  double? percentage;
 
   SongCardRec({
     required this.title,
     required this.image,
     required this.author,
-    required this.percentage,
+    this.percentage,
   });
 
   @override
@@ -32,7 +34,13 @@ class SongCardRec extends StatelessWidget {
                     flex: 3,
                     child: ClipRRect(
                       borderRadius: BorderRadius.all(Radius.circular(5)),
-                      child: Image.asset(this.image, fit: BoxFit.cover),
+                      child: Image.file(
+                        File(this.image),
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset('assets/music_poster.jpg', fit: BoxFit.cover);
+                        },
+                      ),
                     )
                 ),
                 //   place holder text display: width 70%
@@ -68,28 +76,29 @@ class SongCardRec extends StatelessWidget {
                 )
               ],
             ),
-            SizedBox(
-              height: 4,
-              child: Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(5),
-                    child: Container(
-                      height: 5,
-                      color: Colors.white24,
+            if (this.percentage != null)
+              SizedBox(
+                height: 4,
+                child: Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(5),
+                      child: Container(
+                        height: 5,
+                        color: Colors.white24,
+                      ),
                     ),
-                  ),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(5),
-                    child: Container(
-                      height: 5,
-                      width: 250 * this.percentage,
-                      color: Colors.red,
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(5),
+                      child: Container(
+                        height: 5,
+                        width: 250 * this.percentage!,
+                        color: Colors.red,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            )
+                  ],
+                ),
+              )
           ],
         )
       )

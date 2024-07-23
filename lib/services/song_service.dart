@@ -22,6 +22,22 @@ class SongService {
     }
   }
 
+  Future<List<Song>> getDownloadedSongs() async {
+    try {
+      return await _songRepository.fetchDownloadedSongs();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Song?> getADownLoadedSongById(int id) async {
+    try {
+      return await _songRepository.fetchDownloadedSongById(id);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> downloadSong(Song song) async {
     try {
       final directory = await getApplicationDocumentsDirectory();

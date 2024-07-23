@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:melodyopus/constants.dart';
 import 'package:melodyopus/models/song.dart';
@@ -20,6 +22,29 @@ class NowPlayingScreen extends StatefulWidget {
 }
 
 class _NowPlayingScreenState extends State<NowPlayingScreen>{
+  bool isDownloaded = false;
+
+  final songService = SongService();
+  late Song? _song;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _initSong();
+  }
+
+  void _initSong() async {
+    _song = await songService.getADownLoadedSongById(widget.song.id);
+    if (_song != null) {
+      setState(() {
+        isDownloaded = true;
+      });
+    }
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     String imageSrc = widget.song.thumbnail;
@@ -37,7 +62,15 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>{
                 turns: Tween(begin: 0.0, end: 1.0).animate(widget.animationController),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(360),
-                  child: FadeInImage.assetNetwork(
+                  child: isDownloaded ?
+                  Image.file(
+                    File(imageSrc),
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset('assets/music_placeholder.png', fit: BoxFit.cover);
+                    },
+                  ) :
+                  FadeInImage.assetNetwork(
                     placeholder: 'assets/music_placeholder.png',
                     image: imageSrc,
                     fit: BoxFit.cover,
@@ -59,10 +92,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>{
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Mediabuttoncontroller(function: () {}, icon: Icons.share, size: 22,),
+                MediaButtonController(function: () {}, icon: Icons.share, size: 22,),
                 _handleDownloadSong(),
-                Mediabuttoncontroller(function: () {}, icon: Icons.playlist_add),
-                Mediabuttoncontroller(function: () {}, icon: Icons.favorite_border),
+                MediaButtonController(function: () {}, icon: Icons.playlist_add),
+                MediaButtonController(function: () {}, icon: Icons.favorite_border),
               ],
             )
           ],
@@ -72,48 +105,50 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>{
   }
 
   Widget _handleDownloadSong() {
-    return Mediabuttoncontroller(
+    return MediaButtonController(
       function: () async {
-        final sharePrefService = SharedPreferencesService();
-        bool isLoggedIn = await sharePrefService.isLoggedIn();
-        if (!isLoggedIn) {
-          CustomAlertDialog.show(
-            context: context, 
-            title: "Alert",
-            message: "You have to log in to use this feature", 
-            button: "Log in",
-            function: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Login())
+        if (!isDownloaded) {
+          final sharePrefService = SharedPreferencesService();
+          bool isLoggedIn = await sharePrefService.isLoggedIn();
+          if (!isLoggedIn) {
+            CustomAlertDialog.show(
+                context: context,
+                title: "Alert",
+                message: "You have to log in to use this feature",
+                button: "Log in",
+                function: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Login())
+                  );
+                }
+            );
+          } else {
+            try {
+              print('Downloading');
+              CustomSnackBar.show(
+                  context: context,
+                  content: "Downloading"
+              );
+              final songService = SongService();
+              await songService.downloadSong(widget.song);
+              CustomSnackBar.show(
+                  context: context,
+                  content: "Download successfully"
+              );
+              print('Download successfully');
+            } catch (e) {
+              print('Download failed');
+              print(e);
+              CustomSnackBar.show(
+                  context: context,
+                  content: "Download failed"
               );
             }
-          ); 
-        } else {
-          try {
-            print('Downloading');
-            CustomSnackBar.show(
-                context: context,
-                content: "Downloading"
-            );
-            final songService = SongService();
-            await songService.downloadSong(widget.song);
-            CustomSnackBar.show(
-                context: context,
-                content: "Download successfully"
-            );
-            print('Download successfully');
-          } catch (e) {
-            print('Download failed');
-            print(e);
-            CustomSnackBar.show(
-                context: context,
-                content: "Download failed"
-            );
           }
         }
       },
-      icon: Icons.download,
+      icon: isDownloaded ? Icons.download_done : Icons.download,
       size: 22,
     );
   }

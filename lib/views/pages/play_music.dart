@@ -6,10 +6,12 @@ import 'package:just_audio/just_audio.dart';
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:marquee/marquee.dart';
 import 'package:melodyopus/audio_helpers/duration_state.dart';
+import 'package:melodyopus/models/song.dart';
 import 'package:melodyopus/providers/music_play_provider.dart';
 import 'package:melodyopus/views/fragments/lyrics_screen.dart';
 import 'package:melodyopus/views/fragments/now_playing_screen.dart';
 import 'package:melodyopus/views/fragments/playlist_screen.dart';
+import 'package:melodyopus/views/widgets/loading.dart';
 import 'package:melodyopus/views/widgets/media_button_controller.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 
@@ -30,6 +32,9 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
 
   Color mainColor = const Color.fromRGBO(233, 112, 142, 1.0);
 
+  final musicPlayer = MusicPlayerProvider();
+  late Song? _song;
+
 
   @override
   void dispose() {
@@ -44,6 +49,8 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
     // TODO: implement initState
     super.initState();
 
+    _song = musicPlayer.currentSong;
+
     loopMode = LoopMode.off;
     currentAnimationPosition = 0.0;
     animationController = AnimationController(
@@ -53,13 +60,12 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
 
     animationController.forward(from: currentAnimationPosition);
     animationController.repeat();
-
   }
 
   @override
   Widget build(BuildContext context) {
-    final musicPlayer = MusicPlayerProvider();
-    // musicPlayer.play();
+    if (_song == null)
+      return Center(child: Loading());
     return PopScope(
       onPopInvoked: (didPop) {
         if (didPop) {
@@ -67,6 +73,7 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
         }
       },
       child: Scaffold(
+            resizeToAvoidBottomInset: false,
             appBar: AppBar(
                 backgroundColor: Color.fromRGBO(31, 31, 31, 0.09),
                 leading: IconButton(
@@ -84,13 +91,13 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      musicPlayer.currentSong!.title.length > 20 ?
+                      _song!.title.length > 20 ?
                       SizedBox(
                           width: MediaQuery.of(context).size.width,
                           child: Container(
                             height: 20,
                             child: Marquee(
-                              text: musicPlayer.currentSong!.title,
+                              text: _song!.title,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w500,
@@ -108,7 +115,7 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
                       )
                           :
                       Text(
-                        musicPlayer.currentSong!.title,
+                        _song!.title,
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w500,
@@ -118,7 +125,7 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
 
                       SizedBox(height: 5),
                       Text(
-                        musicPlayer.currentSong!.author,
+                        _song!.author,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 13,
@@ -156,7 +163,7 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
                       },
                       children: [
                         PlaylistScreen(),
-                        NowPlayingScreen(song: musicPlayer.currentSong!, animationController: animationController),
+                        NowPlayingScreen(song: _song!, animationController: animationController),
                         LyricsScreen(),
                       ],
                     ),
@@ -186,32 +193,35 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
   }
 
   Widget _getSuffleButton(BuildContext context) {
-    final musicPlayer = MusicPlayerProvider();
-    return Mediabuttoncontroller(
+    return MediaButtonController(
       function: () {},
       icon: Icons.shuffle, color: Colors.white70,
     );
   }
 
   Widget _getPreviousButton(BuildContext context) {
-    final musicPlayer = MusicPlayerProvider();
-    return Mediabuttoncontroller(
+    return MediaButtonController(
       function: () {
         currentAnimationPosition = 0.0;
         animationController.forward(from: currentAnimationPosition);
         musicPlayer.playPrevious();
+        setState(() {
+          _song = musicPlayer.currentSong;
+        });
       },
       icon: Icons.skip_previous, useBackground: true, backgroundColor: mainColor, size: 25,
     );
   }
 
   Widget _getNextButton(BuildContext context) {
-    final musicPlayer = MusicPlayerProvider();
-    return Mediabuttoncontroller(
+    return MediaButtonController(
       function: () {
         currentAnimationPosition = 0.0;
         animationController.forward(from: currentAnimationPosition);
         musicPlayer.playNext();
+        setState(() {
+          _song = musicPlayer.currentSong;
+        });
       },
       icon: Icons.skip_next, useBackground: true, backgroundColor: mainColor, size: 25,
     );
@@ -237,7 +247,7 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
         break;
     }
 
-    return Mediabuttoncontroller(
+    return MediaButtonController(
       function: () {
         setState(() {
           switch (loopMode) {
@@ -277,7 +287,7 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
             child: CircularProgressIndicator(color: Colors.white),
           );
         } else if ( playing != true) {
-          return Mediabuttoncontroller(
+          return MediaButtonController(
             function: () {
               musicPlayer.play();
               animationController.forward(from: currentAnimationPosition);
@@ -288,7 +298,7 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
         } else if (processingState == ProcessingState.completed) {
           currentAnimationPosition = 0.0;
           animationController.stop();
-          return Mediabuttoncontroller(
+          return MediaButtonController(
             function: () {
               musicPlayer.seekTo(Duration.zero);
               animationController.forward(from: currentAnimationPosition);
@@ -296,7 +306,7 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
             icon: Icons.replay, useBackground: true, backgroundColor: mainColor, size: 35,
           );
         } else {
-          return Mediabuttoncontroller(
+          return MediaButtonController(
             function: () {
               musicPlayer.pause();
               animationController.stop();

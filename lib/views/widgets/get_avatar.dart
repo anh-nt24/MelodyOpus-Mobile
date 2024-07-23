@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:melodyopus/models/user.dart';
 
-Widget getUserAvatar(User user) {
+Widget getUserAvatar(User user, {double textSize = 20}) {
   if (user.id == -1) {
     return CircleAvatar(
       backgroundImage: AssetImage(user.avatar),
@@ -22,7 +22,7 @@ Widget getUserAvatar(User user) {
           child: Text(user.avatar, style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w500,
-            fontSize: 20
+            fontSize: textSize
           )),
         );
       },
@@ -39,7 +39,7 @@ Color _getRandomColorForWhiteText() {
     final green = random.nextInt(256);
     final blue = random.nextInt(256);
     color = Color.fromRGBO(red, green, blue, 1.0);
-  } while (_getLuminance(color) > 0.8); // Ensure luminance is low enough
+  } while (_getLuminance(color) > 0.9); // Ensure luminance is low enough
 
   return color;
 }

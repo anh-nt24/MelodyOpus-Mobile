@@ -56,6 +56,9 @@ class MusicPlayerProvider with ChangeNotifier {
     } else if (_currentIndex < _playlist.length - 1) {
       _currentIndex++;
       _playCurrentSong();
+    } else {
+      _currentIndex = 0;
+      _playCurrentSong();
     }
   }
 
@@ -64,6 +67,9 @@ class MusicPlayerProvider with ChangeNotifier {
       _audioManager.replay();
     } else if (_currentIndex > 0) {
       _currentIndex--;
+      _playCurrentSong();
+    } else {
+      _currentIndex = _playlist.length - 1;
       _playCurrentSong();
     }
   }

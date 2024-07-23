@@ -11,6 +11,7 @@ class _LibraryTabState extends State<LibraryTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Center(
         child: Text("Library Tab"),
       ),

@@ -125,11 +125,12 @@ class _HomeTabState extends State<HomeTab> {
       "assets/r&b.png": "R&B"
     };
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: ListView(
         scrollDirection: Axis.vertical,
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 10, left: 20, ),
+            padding: const EdgeInsets.only(top: 10, left: 10, ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
