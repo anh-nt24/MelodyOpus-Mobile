@@ -55,6 +55,7 @@ dependencies:
   sqflite: ^2.0.0+3
   path_provider: ^2.0.2
   flutter_local_notifications: ^10.0.0
+  connectivity_plus: ^3.0.0
 
 dependency_overrides:
   fading_edge_scrollview: ^4.1.1

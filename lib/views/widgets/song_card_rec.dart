@@ -7,12 +7,14 @@ class SongCardRec extends StatelessWidget {
   String image;
   String author;
   double? percentage;
+  Color? backgroundColor;
 
   SongCardRec({
     required this.title,
     required this.image,
     required this.author,
     this.percentage,
+    this.backgroundColor,
   });
 
   @override
@@ -23,7 +25,7 @@ class SongCardRec extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(5)),
-          color: Color.fromRGBO(72, 115, 121, 0.3)
+          color: this.backgroundColor == null ? Color.fromRGBO(72, 115, 121, 0.3) : this.backgroundColor,
         ),
         child: Column(
           children: [
@@ -69,7 +71,6 @@ class SongCardRec extends StatelessWidget {
                               maxLines: 1,
                             ),
                           )
-
                         ],
                       ),
                     )

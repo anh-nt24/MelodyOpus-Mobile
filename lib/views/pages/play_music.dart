@@ -48,7 +48,7 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
   void initState() {
     // TODO: implement initState
     super.initState();
-
+    musicPlayer.addListener(_onMusicPlayerChanged);
     _song = musicPlayer.currentSong;
 
     loopMode = LoopMode.off;
@@ -60,6 +60,16 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
 
     animationController.forward(from: currentAnimationPosition);
     animationController.repeat();
+  }
+
+  void _onMusicPlayerChanged() {
+    if (mounted && musicPlayer.oldSong != musicPlayer.currentSong) {
+      WidgetsBinding.instance!.addPostFrameCallback((_) {
+        setState(() {
+          _song = musicPlayer.currentSong;
+        });
+      });
+    }
   }
 
   @override
@@ -205,9 +215,6 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
         currentAnimationPosition = 0.0;
         animationController.forward(from: currentAnimationPosition);
         musicPlayer.playPrevious();
-        setState(() {
-          _song = musicPlayer.currentSong;
-        });
       },
       icon: Icons.skip_previous, useBackground: true, backgroundColor: mainColor, size: 25,
     );
@@ -219,9 +226,6 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
         currentAnimationPosition = 0.0;
         animationController.forward(from: currentAnimationPosition);
         musicPlayer.playNext();
-        setState(() {
-          _song = musicPlayer.currentSong;
-        });
       },
       icon: Icons.skip_next, useBackground: true, backgroundColor: mainColor, size: 25,
     );
@@ -232,36 +236,28 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
     Color color;
     final musicPlayer = MusicPlayerProvider();
 
-    switch (loopMode) {
-      case LoopMode.one:
-        icon = Icons.repeat_one;
-        color = mainColor;
-        break;
-      case LoopMode.all:
-        icon = Icons.repeat;
-        color = mainColor;
-        break;
-      default:
-        icon = Icons.repeat;
-        color = Colors.white70;
-        break;
+    if (loopMode == LoopMode.one) {
+      icon = Icons.repeat_one;
+      color = mainColor;
+    } else if (loopMode == LoopMode.all) {
+      icon = Icons.repeat;
+      color = mainColor;
+    } else {
+      icon = Icons.repeat;
+      color = Colors.white70;
     }
 
     return MediaButtonController(
       function: () {
         setState(() {
-          switch (loopMode) {
-            case LoopMode.one:
-              loopMode = LoopMode.all;
-              break;
-            case LoopMode.all:
-              loopMode = LoopMode.off;
-              break;
-            default:
-              loopMode = LoopMode.one;
-              break;
+          if (loopMode == LoopMode.one) {
+            loopMode = LoopMode.all;
+          } else if (loopMode == LoopMode.all) {
+            loopMode = LoopMode.off;
+          } else {
+            loopMode = LoopMode.one;
           }
-          musicPlayer.setLoopMode(loopMode);
+          // musicPlayer.setLoopMode(loopMode);
         });
       },
       icon: icon,
@@ -277,6 +273,7 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
         final playState = snapshot.data;
         final processingState = playState?.processingState;
         final playing = playState?.playing;
+
 
         if (processingState == ProcessingState.loading
           || processingState == ProcessingState.buffering) {
@@ -295,17 +292,7 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
             },
             icon: Icons.play_arrow, useBackground: true, backgroundColor:mainColor, size: 35,
           );
-        } else if (processingState == ProcessingState.completed) {
-          currentAnimationPosition = 0.0;
-          animationController.stop();
-          return MediaButtonController(
-            function: () {
-              musicPlayer.seekTo(Duration.zero);
-              animationController.forward(from: currentAnimationPosition);
-            },
-            icon: Icons.replay, useBackground: true, backgroundColor: mainColor, size: 35,
-          );
-        } else {
+        } else if (processingState != ProcessingState.completed) {
           return MediaButtonController(
             function: () {
               musicPlayer.pause();
@@ -314,6 +301,29 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
             },
             icon: Icons.pause, useBackground: true, backgroundColor: mainColor, size: 35,
           );
+        } else {
+          currentAnimationPosition = 0.0;
+          if (loopMode == LoopMode.off) {
+            if ((musicPlayer.currentIndex != musicPlayer.playlist.length - 1)) {
+              musicPlayer.playNext();
+              return const SizedBox.shrink();
+            } else {
+              animationController.stop();
+              return MediaButtonController(
+                function: () {
+                  musicPlayer.seekTo(Duration.zero);
+                  animationController.forward(from: currentAnimationPosition);
+                },
+                icon: Icons.replay, useBackground: true, backgroundColor: mainColor, size: 35,
+              );
+            }
+          } else if (loopMode == LoopMode.all) {
+            musicPlayer.playNext();
+            return const SizedBox.shrink();
+          } else {
+            musicPlayer.seekTo(Duration.zero);
+            return const SizedBox.shrink();
+          }
         }
       }
     );

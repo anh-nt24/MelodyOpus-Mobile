@@ -3,12 +3,14 @@ import 'package:melodyopus/models/song.dart';
 import 'package:melodyopus/providers/music_play_provider.dart';
 import 'package:melodyopus/services/song_service.dart';
 import 'package:melodyopus/views/pages/play_music.dart';
+import 'package:melodyopus/views/widgets/custom_snack_bar.dart';
 import 'package:melodyopus/views/widgets/loading.dart';
 import 'package:melodyopus/views/widgets/song_card_rec.dart';
 import 'package:provider/provider.dart';
 
 class Download extends StatefulWidget {
-  const Download({super.key});
+  final bool showConnection;
+  const Download({super.key, this.showConnection = false});
 
   @override
   State<Download> createState() => _DownloadState();
@@ -22,6 +24,11 @@ class _DownloadState extends State<Download> {
     // TODO: implement initState
     super.initState();
     _loadDownloadedSongs();
+    if (widget.showConnection) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        CustomSnackBar.show(context: context, content: "No internet connection");
+      });
+    }
   }
 
   Future<void> _loadDownloadedSongs() async {
@@ -48,6 +55,8 @@ class _DownloadState extends State<Download> {
       return Center(child: Loading());
 
     final musicPlayer = Provider.of<MusicPlayerProvider>(context);
+
+
 
     return Scaffold(
       resizeToAvoidBottomInset: false,

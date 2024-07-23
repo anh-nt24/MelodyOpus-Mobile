@@ -27,7 +27,10 @@ class MusicPlayerProvider with ChangeNotifier {
   bool get isPlaying => _playing;
   bool get isFullScreen => _isFullScreen;
 
+  Song? _oldSong = null;
+
   Song? get currentSong => _playlist.isNotEmpty ? _playlist[_currentIndex] : null;
+  Song? get oldSong => _oldSong;
 
   get getPlayerStateStream => _audioManager.getPlayerStateStream;
 
@@ -50,7 +53,14 @@ class MusicPlayerProvider with ChangeNotifier {
     }
   }
 
+  void playAtIndex(int index) {
+    _oldSong = currentSong;
+    _currentIndex = index;
+    _playCurrentSong();
+  }
+
   void playNext() {
+    _oldSong = currentSong;
     if (_playlist.length == 1) {
       _audioManager.replay();
     } else if (_currentIndex < _playlist.length - 1) {
@@ -63,6 +73,7 @@ class MusicPlayerProvider with ChangeNotifier {
   }
 
   void playPrevious() {
+    _oldSong = currentSong;
     if (_playlist.length == 1) {
       _audioManager.replay();
     } else if (_currentIndex > 0) {
@@ -111,6 +122,7 @@ class MusicPlayerProvider with ChangeNotifier {
 
   void setLoopMode(LoopMode loopMode) {
     _audioManager.setLoopMode(loopMode);
+    notifyListeners();
   }
 
   void seekTo(Duration position) {

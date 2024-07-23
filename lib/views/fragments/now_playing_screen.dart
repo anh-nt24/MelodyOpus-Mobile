@@ -1,9 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:melodyopus/constants.dart';
 import 'package:melodyopus/models/song.dart';
-import 'package:melodyopus/models/user.dart';
 import 'package:melodyopus/services/sharedpreference_service.dart';
 import 'package:melodyopus/services/song_service.dart';
 import 'package:melodyopus/views/pages/login.dart';
@@ -49,6 +47,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>{
   Widget build(BuildContext context) {
     String imageSrc = widget.song.thumbnail;
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Center(
         child: Column(
           children: [
