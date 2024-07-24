@@ -13,10 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
-  Future<bool> _checkNetworkStatus() async {
-    final connectivityResult = await Connectivity().checkConnectivity();
-    return connectivityResult != ConnectivityResult.none;
-  }
+
 
   Future<bool> _checkFirstLaunch() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
@@ -31,8 +28,6 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final networkMonitor = NetworkConnectionService(context);
-    networkMonitor.monitorNetworkChanges();
     return FutureBuilder<bool>(
       future: _checkFirstLaunch(),
       builder: (context, snapshot) {
@@ -66,7 +61,7 @@ class SplashScreen extends StatelessWidget {
             );
           }
           return FutureBuilder<bool>(
-            future: _checkNetworkStatus(),
+            future: NetworkConnectionService(context).checkNetworkStatus(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Scaffold(

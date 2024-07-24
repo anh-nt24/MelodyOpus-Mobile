@@ -51,6 +51,10 @@ class AudioManager {
   }
 
   Future<void> setUrl(String url) async {
-    await _player.setUrl(url);
+    try {
+      await _player.setUrl(url);
+    } catch (e) {
+      throw Exception(e);
+    }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:melodyopus/providers/auth_provider.dart';
 import 'package:melodyopus/providers/music_play_provider.dart';
+import 'package:melodyopus/services/network_connection_service.dart';
 import 'package:melodyopus/splash_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -32,6 +33,10 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       home: const SplashScreen(),
+      builder: (context, child) {
+        NetworkConnectionService(context);
+        return child!;
+      },
     );
   }
 }
