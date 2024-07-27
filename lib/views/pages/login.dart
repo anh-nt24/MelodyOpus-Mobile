@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:melodyopus/models/user.dart';
 import 'package:melodyopus/providers/auth_provider.dart';
-import 'package:melodyopus/services/sharedpreference_service.dart';
 import 'package:melodyopus/services/user_service.dart';
 import 'package:melodyopus/views/pages/homepage.dart';
 import 'package:melodyopus/views/pages/signup.dart';
@@ -24,6 +25,14 @@ class _LoginState extends State<Login> {
   RegExp regex = RegExp(r'^[a-zA-Z0-9_.]*$');
 
   late UserService _userService;
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: [
+      'email',
+      'https://www.googleapis.com/auth/userinfo.profile',
+    ],
+    clientId: dotenv.env['GOOGLE_CLIENT_ID'] ?? ''
+  );
 
   @override
   void dispose() {
@@ -199,7 +208,7 @@ class _LoginState extends State<Login> {
                           SizedBox(width: 30,),
                           Expanded(
                             child: MaterialButton(
-                              onPressed: () {},
+                              onPressed: _handleGoogleSignIn,
                               height: 50,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(50),
@@ -278,6 +287,31 @@ class _LoginState extends State<Login> {
           context: context,
           content: "Username or password may not correct"
       );
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser != null) {
+        final GoogleSignInAuthentication authentication = await googleUser.authentication;
+        final idToken = authentication.idToken;
+
+        User userResponse = await _userService.signInGoogle(idToken);
+        await Provider.of<AuthProvider>(context, listen: false).login(userResponse);
+
+        CustomSnackBar.show(
+            context: context,
+            content: "Login successfully"
+        );
+
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Homepage())
+        );
+      }
+    } catch (e) {
+      print(e);
     }
   }
 }

@@ -15,12 +15,12 @@ class NetworkConnectionService {
   }
 
   void monitorNetworkChanges() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      CustomSnackBar.show(
-        context: context,
-        content: 'Checking internet connection...',
-      );
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   CustomSnackBar.show(
+    //     context: context,
+    //     content: 'Checking internet connection...',
+    //   );
+    // });
 
     Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
       if (result != ConnectivityResult.none) {

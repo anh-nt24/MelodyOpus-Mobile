@@ -111,7 +111,15 @@ class _UserTabState extends State<UserTab> {
                     ),
                   ),
                   SizedBox(width: 15),
-                  Text(user.name, style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w500),),
+                  Flexible(
+                    child: Text(
+                      user.name,
+                      style: TextStyle(color: Colors.white, fontSize: 25, fontWeight: FontWeight.w500),
+                      textAlign: TextAlign.left,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
 

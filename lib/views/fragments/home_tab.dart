@@ -139,7 +139,7 @@ class _HomeTabState extends State<HomeTab> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     //   left side
-                    Row(
+                    Expanded(child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         // avatar
@@ -156,16 +156,26 @@ class _HomeTabState extends State<HomeTab> {
                           ),
                         ),
                         SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Hello
-                            Text("Hello,", style: TextStyle(color: Colors.white, fontSize: 20),),
-                            Text(" " + user.username, style: TextStyle(color: Colors.white70, fontSize: 15),),
-                          ],
+                        Flexible(
+                          child: Padding(
+                            padding: EdgeInsets.only(right: 5),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Hello
+                                Text("Hello,", style: TextStyle(color: Colors.white, fontSize: 20),),
+                                Text(
+                                  user.username,
+                                  style: TextStyle(color: Colors.white70, fontSize: 15),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          )
                         )
                       ],
-                    ),
+                    )),
+
 
                     //   right side
                     Row(

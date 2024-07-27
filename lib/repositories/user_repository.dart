@@ -29,6 +29,22 @@ class UserRepository {
     }
   }
 
+  Future<User> signInGoogle(String idToken) async {
+    final response = await http.post(
+      Uri.parse('${Constants.baseApi}/auth/google'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'credentials': idToken,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return User.fromJson(json.decode(response.body));
+    } else {
+      throw Exception(response.body);
+    }
+  }
+
   Future<void> signup(String name, String email, String username, String password) async {
     final response = await http.post(
       Uri.parse('${Constants.baseApi}/auth/register'),
@@ -44,5 +60,7 @@ class UserRepository {
     if (response.statusCode != 200) {
       throw Exception(response.body);
     }
+
   }
+
 }
