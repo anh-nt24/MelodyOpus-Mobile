@@ -1,16 +1,50 @@
-# melodyopus
+# MelodyOpus - Mobile
 
-The frontend code for a cross-platform music player application built using Flutter
+This repository hosts the mobile frontend code for a modern music player application built with Flutter. The application allows users to stream music, create playlists, follow artists, and manage their profiles.
+
+Backend: [Check here](https://github.com/anh-nt24/MelodyOpus-Backend)
+
+## Features
+- User authentication (OAuth2, JWT)
+- Online and offline music streaming
+- Download songs
+- Playlist and song management (being developed)
+- Follow and unfollow artists (being developed)
+- Like and unlike songs (being developed)
+- Profile management (being developed)
+- Track listening history (being developed)
+
+## Technologies Used
+- Flutter
+- Dart
+- Provider for state management
+- JustAudio for audio playback
+- HTTP for network requests
+- Firebase for authentication and other backend services
+- Sqflite for local database management
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+To get started with the MelodyOpus mobile application, follow these steps:
 
-A few resources to get you started if this is your first Flutter project:
+1. **Clone the repository:**
+   ```sh
+   git clone https://github.com/anh-nt24/MelodyOpus-Mobile.git
+   cd MelodyOpus-Mobile
+    ```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+2. **Install dependencies:**
+    ```sh
+    flutter pub get
+    ```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+3. **Set up Firebase:**
+
+    *Set up Firebase for Google sign in, and download google-service.json file*
+
+4. **Run the application:**
+
+    Run the backend first. Check the [repo](https://github.com/anh-nt24/MelodyOpus-Backend) for instructions
+    ```
+    flutter run
+    ```
