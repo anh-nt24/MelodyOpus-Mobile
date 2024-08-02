@@ -48,22 +48,22 @@ class LocalDatabaseHelper {
     await db.execute('''
       CREATE TABLE History (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        song_id TEXT,
+        song_id INTEGER,
         timestamp INTEGER,
         position INTEGER,
-        FOREIGN KEY(song_id) REFERENCES Songs(song_id)
+        FOREIGN KEY(song_id) REFERENCES Songs(id)
       )
     ''');
 
     // create watch later database
-    await db.execute('''
-      CREATE TABLE WatchLater (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        song_id TEXT,
-        added_timestamp INTEGER,
-        FOREIGN KEY(song_id) REFERENCES Songs(song_id)
-      )
-    ''');
+    // await db.execute('''
+    //   CREATE TABLE WatchLater (
+    //     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    //     song_id TEXT,
+    //     added_timestamp INTEGER,
+    //     FOREIGN KEY(song_id) REFERENCES Songs(song_id)
+    //   )
+    // ''');
 
     // create usage tracking database
     await db.execute('''

@@ -23,7 +23,7 @@ class UserRepository {
     );
 
     if (response.statusCode == 200) {
-      return User.fromJson(json.decode(response.body));
+      return User.fromJson(json.decode(utf8.decode(response.bodyBytes)));
     } else {
       throw Exception(response.body);
     }
@@ -39,7 +39,7 @@ class UserRepository {
     );
 
     if (response.statusCode == 200) {
-      return User.fromJson(json.decode(response.body));
+      return User.fromJson(json.decode(utf8.decode(response.bodyBytes)));
     } else {
       throw Exception(response.body);
     }

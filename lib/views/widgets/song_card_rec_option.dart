@@ -35,8 +35,8 @@ class SongCardRecOption extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(5)),
                   child: SizedBox(
-                    width: 100,  // Set your desired width
-                    height: 90, // Set your desired height
+                    width: 100,
+                    height: 90,
                     child: FadeInImage.assetNetwork(
                       image: this.image,
                       fit: BoxFit.cover,

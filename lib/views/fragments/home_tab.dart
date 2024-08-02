@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:melodyopus/models/paginated_response.dart';
 import 'package:melodyopus/models/song.dart';
 import 'package:melodyopus/models/user.dart';
 import 'package:melodyopus/providers/auth_provider.dart';
 import 'package:melodyopus/providers/music_play_provider.dart';
+import 'package:melodyopus/services/history_service.dart';
 import 'package:melodyopus/services/sharedpreference_service.dart';
 import 'package:melodyopus/services/song_service.dart';
 import 'package:melodyopus/views/pages/play_music.dart';
@@ -26,18 +30,25 @@ class HomeTab extends StatefulWidget {
 class _HomeTabState extends State<HomeTab> {
 
   final SongService _songService = SongService();
+  final HistoryService _historyService = HistoryService(AudioPlayer());
   final ScrollController _scrollController1 = ScrollController();
   final ScrollController _scrollController2 = ScrollController();
+
   List<Song> _songs = [];
+  List<Map<String, dynamic>> _notFinishedsongs = [];
+
   int _currentPage = 0;
   final int _pageSize = 20;
   bool _isLoading = false;
   bool _hasMore = true;
 
+  Timer? _timer;
+
   @override
   void dispose() {
     // TODO: implement dispose
     MusicPlayerProvider().dispose();
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -45,6 +56,7 @@ class _HomeTabState extends State<HomeTab> {
   void initState() {
     super.initState();
     _loadSongs();
+    _loadNotFinishedSongs();
 
     _scrollController1.addListener(() {
       if (_scrollController1.position.pixels == _scrollController1.position.maxScrollExtent && !_isLoading) {
@@ -56,6 +68,10 @@ class _HomeTabState extends State<HomeTab> {
       if (_scrollController2.position.pixels == _scrollController2.position.maxScrollExtent && !_isLoading) {
         _loadMoreSongs();
       }
+    });
+
+    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+      _loadNotFinishedSongs(isFirst: false);
     });
   }
 
@@ -105,6 +121,40 @@ class _HomeTabState extends State<HomeTab> {
       });
     } catch (e) {
       CustomSnackBar.show(context: context, content: e.toString());
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadNotFinishedSongs({bool isFirst=true}) async {
+    if (isFirst) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+
+    try {
+      // Fetch songs from the history service
+      final songHistories = await _historyService.getSongsInHistory();
+      final List<Map<String, dynamic>> updatedSongs = [];
+
+      for (var songHistory in songHistories.reversed) {
+        Song song = await _songService.getSongById(songHistory['song_id']);
+
+        if (song.duration > songHistory['position']) {
+          var updatedSongHistory = Map<String, dynamic>.from(songHistory);
+          updatedSongHistory['song'] = song;
+          updatedSongs.add(updatedSongHistory);
+        }
+      }
+
+      setState(() {
+        _notFinishedsongs = updatedSongs;
+      });
+    } catch (e) {
+      print("Error loading songs: $e");
     } finally {
       setState(() {
         _isLoading = false;
@@ -203,22 +253,39 @@ class _HomeTabState extends State<HomeTab> {
                 SizedBox(height: 10,),
 
                 Container(
-                    height: 90,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        for (int i=0;i<3; ++i)
-                          Padding(
-                            padding: EdgeInsets.all(5),
-                            child: SongCardRec(title: "Nhan Gio May Rang Anh Yeu Em", image: "assets/music_poster.jpg", author: "Hoang Hai", percentage: 0.5,),
-                          ),
-
-                        const SizedBox(width: 5),//
-                      ],
-                    )
+                  height: 110,
+                  child: _isLoading
+                      ? Center(child: CircularProgressIndicator())
+                      : ListView.builder(
+                    itemCount: _notFinishedsongs.length,
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (context, index) {
+                      final songHistory = _notFinishedsongs[index];
+                      Song song = songHistory['song'];
+                      double percentage = (song.duration == 0)? 0.0 : (songHistory['position']/song.duration);
+                      return GestureDetector(
+                          onTap: () {
+                            musicPlayer.setPlaylist([song], index: index);
+                            musicPlayer.setFullScreen(true);
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => PlayMusic())
+                            );
+                          },
+                          child: Container(
+                              height: 123,
+                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                              child: Padding(
+                                padding: EdgeInsets.all(5),
+                                child: SongCardRec(title: song.title, image: song.thumbnail, author: song.author, percentage: percentage),
+                              )
+                          )
+                      );
+                    },
+                  ),
                 ),
 
-                SizedBox(height: 30,),
+                SizedBox(height: 20,),
 
 // FOR YOU
 

@@ -63,4 +63,20 @@ class RemoteDataSource {
       throw Exception("Error on adding a new song");
     }
   }
+
+  Future<Song> getSongById(int id) async {
+    final response = await http.get(
+        Uri.parse('${Constants.baseApi}/song/${id}'),
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+    );
+
+    if (response.statusCode == 200) {
+      return Song.fromJson(json.decode(utf8.decode(response.bodyBytes)));
+    } else {
+      throw Exception(json.decode(response.body));
+    }
+  }
 }

@@ -3,17 +3,20 @@ import 'package:just_audio/just_audio.dart';
 import 'package:melodyopus/audio_helpers/audio_manager.dart';
 import 'package:melodyopus/audio_helpers/duration_state.dart';
 import 'package:melodyopus/models/song.dart';
+import 'package:melodyopus/services/history_service.dart';
 
 
 class MusicPlayerProvider with ChangeNotifier {
-  MusicPlayerProvider._internal();
-  static final MusicPlayerProvider _instance = MusicPlayerProvider._internal();
-  factory MusicPlayerProvider() {
-    return _instance;
+  late final HistoryService _historyService;
+  late final AudioManager _audioManager;
+
+  MusicPlayerProvider._internal() {
+    _audioManager = AudioManager();
+    _historyService = HistoryService(_audioManager.player);
   }
+  static final MusicPlayerProvider _instance = MusicPlayerProvider._internal();
+  factory MusicPlayerProvider() => _instance;
 
-
-  final AudioManager _audioManager = AudioManager();
   List<Song> _playlist = [];
   int _currentIndex = 0;
 
@@ -91,24 +94,28 @@ class MusicPlayerProvider with ChangeNotifier {
       _audioManager.init();
       _audioManager.play();
       _playing = true;
+      _historyService.startListening(currentSong!.id);
       notifyListeners();
     }
   }
 
   void play() {
     _audioManager.play();
+    _historyService.startListening(currentSong!.id);
     _playing = true;
     notifyListeners();
   }
 
   void pause() {
     _audioManager.pause();
+    _historyService.stopListening(currentSong!.id);
     _playing = false;
     notifyListeners();
   }
 
   void stop() async {
     _audioManager.pause();
+    _historyService.stopListening(currentSong!.id);
     _playing = false;
     notifyListeners();
   }

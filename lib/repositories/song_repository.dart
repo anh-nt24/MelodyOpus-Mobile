@@ -1,8 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:http/http.dart' as http;
-import 'package:melodyopus/constants.dart';
 import 'package:melodyopus/data_source/local_data_source.dart';
 import 'package:melodyopus/data_source/remote_data_source.dart';
 import 'package:melodyopus/models/paginated_response.dart';
@@ -25,6 +20,14 @@ class SongRepository {
   Future<Song?> fetchDownloadedSongById(int id) async {
     try {
       return await _localDataSource.fetchSongById(id);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Song> getRemoteSongById(int id) async {
+    try {
+      return await _remoteDataSource.getSongById(id);
     } catch (e) {
       rethrow;
     }

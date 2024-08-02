@@ -1,5 +1,4 @@
 import 'package:just_audio/just_audio.dart';
-import 'package:melodyopus/models/song.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'duration_state.dart';
@@ -13,6 +12,8 @@ class AudioManager {
   Stream<DurationState>? durationState;
 
   get getPlayerStateStream => _player.playerStateStream;
+
+  AudioPlayer get player => _player;
   
   void init() {
     durationState = Rx.combineLatest2<Duration, PlaybackEvent, DurationState>(

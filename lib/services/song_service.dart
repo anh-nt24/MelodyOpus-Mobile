@@ -22,6 +22,14 @@ class SongService {
     }
   }
 
+  Future<Song> getSongById(int id) async {
+    try {
+      return await _songRepository.getRemoteSongById(id);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<PaginatedResponse<Song>> getSongsOfUser(String jwt, {int page=0, int pageSize=20}) async {
     try {
       return await _songRepository.getSongsOfUser(jwt, page, pageSize);

@@ -70,10 +70,7 @@ class User {
 
   static String _getInitials(String name) {
     final names = name.split(' ');
-    if (names.length > 1) {
-      return '${names.first[0]}${names.last[0]}'.toUpperCase();
-    }
-    return '${names.first[0]}${names.first[1]}'.toUpperCase();
+    return '${names.first[0]}'.toUpperCase();
   }
 
 }

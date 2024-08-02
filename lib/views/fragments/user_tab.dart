@@ -1,8 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:melodyopus/models/song.dart';
 import 'package:melodyopus/models/user.dart';
 import 'package:melodyopus/providers/auth_provider.dart';
+import 'package:melodyopus/providers/music_play_provider.dart';
+import 'package:melodyopus/services/history_service.dart';
+import 'package:melodyopus/services/song_service.dart';
 import 'package:melodyopus/views/pages/download.dart';
 import 'package:melodyopus/views/pages/login.dart';
+import 'package:melodyopus/views/pages/play_music.dart';
 import 'package:melodyopus/views/widgets/get_avatar.dart';
 import 'package:melodyopus/views/widgets/gradient_button.dart';
 import 'package:melodyopus/views/widgets/media_button_controller.dart';
@@ -17,16 +25,75 @@ class UserTab extends StatefulWidget {
 }
 
 class _UserTabState extends State<UserTab> {
+
+  late final HistoryService _historyService;
+  late final SongService _songService;
+  List<Map<String, dynamic>> _songs = [];
+
+  bool _isLoading = true;
+
+  Timer? _timer;
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _timer?.cancel();
+    super.dispose();
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    _historyService = HistoryService(AudioPlayer());
+    _songService = SongService();
+    _loadSongs();
+
+    // auto refresh every 5 seconds
+    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+      _loadSongs(isFirst: false);
+    });
+  }
+
+  Future<void> _loadSongs({bool isFirst=true}) async {
+    if (isFirst) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+
+    try {
+      // Fetch songs from the history service
+      final songHistories = await _historyService.getSongsInHistory();
+      final List<Map<String, dynamic>> updatedSongs = [];
+
+      for (var songHistory in songHistories.reversed) {
+        Song song = await _songService.getSongById(songHistory['song_id']);
+
+        var updatedSongHistory = Map<String, dynamic>.from(songHistory);
+        updatedSongHistory['song'] = song;
+        updatedSongs.add(updatedSongHistory);
+      }
+
+      setState(() {
+        _songs = updatedSongs;
+      });
+    } catch (e) {
+      print("Error loading songs: $e");
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final authProviver = Provider.of<AuthProvider>(context);
     User user = authProviver.user;
+
+    final musicPlayer = Provider.of<MusicPlayerProvider>(context);
+
     if (user.id < 0) {
       return Scaffold(
         body: Center(
@@ -145,19 +212,36 @@ class _UserTabState extends State<UserTab> {
               ),
 
               Container(
-                height: 90,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    for (int i=0;i<3; ++i)
-                      Padding(
-                        padding: EdgeInsets.all(5),
-                        child: SongCardRec(title: "Nhan Gio May Rang Anh Yeu Em", image: "assets/music_poster.jpg", author: "Hoang Hai", percentage: 0.5,),
-                      ),
-
-                    const SizedBox(width: 5),//
-                  ],
-                )
+                height: 110,
+                child: _isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : ListView.builder(
+                      itemCount: _songs.length,
+                      scrollDirection: Axis.horizontal,
+                      itemBuilder: (context, index) {
+                        final songHistory = _songs[index];
+                        Song song = songHistory['song'];
+                        double percentage = (song.duration == 0)? 0.0 : (songHistory['position']/song.duration);
+                        return GestureDetector(
+                            onTap: () {
+                              musicPlayer.setPlaylist([song], index: index);
+                              musicPlayer.setFullScreen(true);
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => PlayMusic())
+                              );
+                            },
+                            child: Container(
+                              height: 123,
+                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                              child: Padding(
+                                padding: EdgeInsets.all(5),
+                                child: SongCardRec(title: song.title, image: song.thumbnail, author: song.author, percentage: percentage),
+                              )
+                            )
+                        );
+                      },
+                ),
               ),
 
               SizedBox(height: 15),
