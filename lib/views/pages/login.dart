@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:melodyopus/models/user.dart';
 import 'package:melodyopus/providers/auth_provider.dart';
@@ -26,12 +25,13 @@ class _LoginState extends State<Login> {
 
   late UserService _userService;
 
+
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: [
       'email',
       'https://www.googleapis.com/auth/userinfo.profile',
     ],
-    clientId: dotenv.env['GOOGLE_CLIENT_ID'] ?? ''
+    clientId: "624980624379-9k6287srfb5jsffik6eugr3tsi62je1q.apps.googleusercontent.com"
   );
 
   @override

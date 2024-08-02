@@ -140,7 +140,7 @@ class _HomeTabState extends State<HomeTab> {
                   children: [
                     //   left side
                     Expanded(child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         // avatar
                         Container(

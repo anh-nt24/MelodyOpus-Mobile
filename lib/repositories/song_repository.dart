@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:melodyopus/constants.dart';
@@ -40,6 +41,22 @@ class SongRepository {
   Future<PaginatedResponse<Song>> getAllSongs(int page, int pageSize) async {
     try {
       return await _remoteDataSource.fetchSongs(page, pageSize);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<PaginatedResponse<Song>> getSongsOfUser(String jwt, int page, int pageSize) async {
+    try {
+      return await _remoteDataSource.fetchSongsOfUser(jwt, page, pageSize);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> addNewSong(Map<String, dynamic> bodyObject) async {
+    try {
+      return await _remoteDataSource.addNewSong(bodyObject);
     } catch (e) {
       rethrow;
     }
