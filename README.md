@@ -8,11 +8,11 @@ Backend: [Check here](https://github.com/anh-nt24/MelodyOpus-Backend)
 - User authentication (OAuth2, JWT)
 - Online and offline music streaming
 - Download songs
-- Playlist and song management (being developed)
+- Playlist and song management
+- Like and unlike songs
+- Track listening history
 - Follow and unfollow artists (being developed)
-- Like and unlike songs (being developed)
 - Profile management (being developed)
-- Track listening history (being developed)
 
 ## Technologies Used
 - Flutter
