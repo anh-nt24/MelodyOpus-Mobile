@@ -204,7 +204,9 @@ class _PlayMusicState extends State<PlayMusic> with TickerProviderStateMixin{
 
   Widget _getSuffleButton(BuildContext context) {
     return MediaButtonController(
-      function: () {},
+      function: () {
+        musicPlayer.shufflePlaylist();
+      },
       icon: Icons.shuffle, color: Colors.white70,
     );
   }

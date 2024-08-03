@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:melodyopus/audio_helpers/audio_manager.dart';
@@ -56,6 +58,16 @@ class MusicPlayerProvider with ChangeNotifier {
       _playlist = songs;
       _currentIndex = index;
       _playCurrentSong();
+    }
+  }
+
+  void shufflePlaylist() {
+    if (_playlist.isNotEmpty) {
+      final currentSong = _playlist[_currentIndex];
+      _playlist.shuffle(Random());
+      // find the new index of the current song in the shuffled playlist
+      _currentIndex = _playlist.indexOf(currentSong);
+      notifyListeners();
     }
   }
 
