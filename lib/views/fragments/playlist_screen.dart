@@ -32,7 +32,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                 musicPlayer.playAtIndex(index);
               },
               child: Container(
-                height: 90,
+                height: 75,
                 margin: EdgeInsets.symmetric(vertical: 5),
                 child: SongCardRec(
                     title: song.title,

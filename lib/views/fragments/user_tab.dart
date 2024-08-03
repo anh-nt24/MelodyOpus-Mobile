@@ -7,12 +7,14 @@ import 'package:melodyopus/models/user.dart';
 import 'package:melodyopus/providers/auth_provider.dart';
 import 'package:melodyopus/providers/music_play_provider.dart';
 import 'package:melodyopus/services/history_service.dart';
+import 'package:melodyopus/services/like_service.dart';
 import 'package:melodyopus/services/song_service.dart';
 import 'package:melodyopus/views/pages/download.dart';
 import 'package:melodyopus/views/pages/login.dart';
 import 'package:melodyopus/views/pages/play_music.dart';
 import 'package:melodyopus/views/widgets/get_avatar.dart';
 import 'package:melodyopus/views/widgets/gradient_button.dart';
+import 'package:melodyopus/views/widgets/loading.dart';
 import 'package:melodyopus/views/widgets/media_button_controller.dart';
 import 'package:melodyopus/views/widgets/song_card_rec.dart';
 import 'package:provider/provider.dart';
@@ -28,9 +30,12 @@ class _UserTabState extends State<UserTab> {
 
   late final HistoryService _historyService;
   late final SongService _songService;
+  late final LikeService _likeService;
   List<Map<String, dynamic>> _songs = [];
+  List<Song> _likedSongs = [];
 
   bool _isLoading = true;
+  bool _isLoadingLikedSong = true;
 
   Timer? _timer;
 
@@ -47,12 +52,41 @@ class _UserTabState extends State<UserTab> {
     super.initState();
     _historyService = HistoryService(AudioPlayer());
     _songService = SongService();
+    _likeService = LikeService();
+
     _loadSongs();
+    _loadLikedSongs();
 
     // auto refresh every 5 seconds
     _timer = Timer.periodic(Duration(seconds: 5), (timer) {
       _loadSongs(isFirst: false);
+      _loadLikedSongs(isFirst: false);
     });
+  }
+
+  Future<void> _loadLikedSongs({bool isFirst=true}) async {
+    if (isFirst) {
+      setState(() {
+        _isLoadingLikedSong = true;
+      });
+    }
+
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      User user = authProvider.user;
+      if (user.id > -1) {
+        List<Song> fetchedSong = await _likeService.getLikedSongs(user.id, user.jwt);
+        setState(() {
+          _likedSongs = fetchedSong.reversed.toList();
+        });
+      }
+    } catch (e) {
+      print("Error loading songs: $e");
+    } finally {
+      setState(() {
+        _isLoadingLikedSong = false;
+      });
+    }
   }
 
   Future<void> _loadSongs({bool isFirst=true}) async {
@@ -63,7 +97,6 @@ class _UserTabState extends State<UserTab> {
     }
 
     try {
-      // Fetch songs from the history service
       final songHistories = await _historyService.getSongsInHistory();
       final List<Map<String, dynamic>> updatedSongs = [];
 
@@ -214,7 +247,7 @@ class _UserTabState extends State<UserTab> {
               Container(
                 height: 110,
                 child: _isLoading
-                    ? Center(child: CircularProgressIndicator())
+                    ? Center(child: Loading())
                     : ListView.builder(
                       itemCount: _songs.length,
                       scrollDirection: Axis.horizontal,
@@ -266,19 +299,34 @@ class _UserTabState extends State<UserTab> {
               ),
 
               Container(
-                  height: 90,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      for (int i=0;i<3; ++i)
-                        Padding(
-                          padding: EdgeInsets.all(5),
-                          child: SongCardRec(title: "Nhan Gio May Rang Anh Yeu Em", image: "assets/music_poster.jpg", author: "Hoang Hai", percentage: 0.5,),
-                        ),
-
-                      const SizedBox(width: 5),//
-                    ],
-                  )
+                height: 105,
+                child: _isLoadingLikedSong
+                    ? Center(child: Loading())
+                    : ListView.builder(
+                  itemCount: _likedSongs.length,
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (context, index) {
+                    Song song = _likedSongs[index];
+                    return GestureDetector(
+                        onTap: () {
+                          musicPlayer.setPlaylist(_likedSongs, index: index);
+                          musicPlayer.setFullScreen(true);
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => PlayMusic())
+                          );
+                        },
+                        child: Container(
+                            height: 123,
+                            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                            child: Padding(
+                              padding: EdgeInsets.all(5),
+                              child: SongCardRec(title: song.title, image: song.thumbnail, author: song.author),
+                            )
+                        )
+                    );
+                  },
+                ),
               ),
 
               SizedBox(height: 25),

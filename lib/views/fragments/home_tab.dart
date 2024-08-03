@@ -36,11 +36,13 @@ class _HomeTabState extends State<HomeTab> {
 
   List<Song> _songs = [];
   List<Map<String, dynamic>> _notFinishedsongs = [];
+  bool _isLoadingNotFinished = true;
 
   int _currentPage = 0;
   final int _pageSize = 20;
   bool _isLoading = false;
   bool _hasMore = true;
+
 
   Timer? _timer;
 
@@ -131,7 +133,7 @@ class _HomeTabState extends State<HomeTab> {
   Future<void> _loadNotFinishedSongs({bool isFirst=true}) async {
     if (isFirst) {
       setState(() {
-        _isLoading = true;
+        _isLoadingNotFinished = true;
       });
     }
 
@@ -152,12 +154,13 @@ class _HomeTabState extends State<HomeTab> {
 
       setState(() {
         _notFinishedsongs = updatedSongs;
+        _isLoadingNotFinished = false;
       });
     } catch (e) {
       print("Error loading songs: $e");
     } finally {
       setState(() {
-        _isLoading = false;
+        _isLoadingNotFinished = false;
       });
     }
   }
@@ -254,8 +257,8 @@ class _HomeTabState extends State<HomeTab> {
 
                 Container(
                   height: 110,
-                  child: _isLoading
-                      ? Center(child: CircularProgressIndicator())
+                  child: _isLoadingNotFinished
+                      ? Center(child: Loading())
                       : ListView.builder(
                     itemCount: _notFinishedsongs.length,
                     scrollDirection: Axis.horizontal,

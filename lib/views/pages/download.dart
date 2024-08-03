@@ -81,7 +81,7 @@ class _DownloadState extends State<Download> {
               );
             },
             child: Container(
-              height: 123,
+              height: 95,
               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               child: SongCardRec(
                   title: song.title,
