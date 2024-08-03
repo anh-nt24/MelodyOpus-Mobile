@@ -4,11 +4,13 @@ import 'package:melodyopus/audio_helpers/audio_manager.dart';
 import 'package:melodyopus/audio_helpers/duration_state.dart';
 import 'package:melodyopus/models/song.dart';
 import 'package:melodyopus/services/history_service.dart';
+import 'package:melodyopus/services/song_service.dart';
 
 
 class MusicPlayerProvider with ChangeNotifier {
   late final HistoryService _historyService;
   late final AudioManager _audioManager;
+
 
   MusicPlayerProvider._internal() {
     _audioManager = AudioManager();
@@ -17,6 +19,7 @@ class MusicPlayerProvider with ChangeNotifier {
   static final MusicPlayerProvider _instance = MusicPlayerProvider._internal();
   factory MusicPlayerProvider() => _instance;
 
+  final SongService _songService = SongService();
   List<Song> _playlist = [];
   int _currentIndex = 0;
 
@@ -95,6 +98,7 @@ class MusicPlayerProvider with ChangeNotifier {
       _audioManager.play();
       _playing = true;
       _historyService.startListening(currentSong!.id);
+      _songService.updateListen(currentSong!.id);
       notifyListeners();
     }
   }
@@ -102,6 +106,7 @@ class MusicPlayerProvider with ChangeNotifier {
   void play() {
     _audioManager.play();
     _historyService.startListening(currentSong!.id);
+    _songService.updateListen(currentSong!.id);
     _playing = true;
     notifyListeners();
   }

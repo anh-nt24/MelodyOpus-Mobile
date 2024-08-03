@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:melodyopus/constants.dart';
 import 'package:melodyopus/models/paginated_response.dart';
@@ -76,6 +75,20 @@ class RemoteDataSource {
     if (response.statusCode == 200) {
       return Song.fromJson(json.decode(utf8.decode(response.bodyBytes)));
     } else {
+      throw Exception(json.decode(response.body));
+    }
+  }
+
+  Future<void> updateListen(int id) async {
+    final response = await http.put(
+        Uri.parse('${Constants.baseApi}/song/listen?songId=${id}'),
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+    );
+
+    if (response.statusCode != 200) {
       throw Exception(json.decode(response.body));
     }
   }

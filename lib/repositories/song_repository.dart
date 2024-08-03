@@ -33,6 +33,14 @@ class SongRepository {
     }
   }
 
+  Future<void> updateListen(int id) async {
+    try {
+      return await _remoteDataSource.updateListen(id);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<List<Song>> fetchDownloadedSongs() async {
     try {
       return await _localDataSource.fetchAllSongs();
